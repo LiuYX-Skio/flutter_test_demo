@@ -54,32 +54,36 @@ class SortViewModel extends ChangeNotifier {
 
   /// 获取排行榜列表
   Future<void> fetchSortList(int page) async {
-    try {
-      if (page == 1) {
-        _isLoading = true;
-      }
-      notifyListeners();
-
-      final result = await HomeApi.getSortShopList(page: page);
-      if (result != null && result.list != null) {
-        if (page == 1) {
-          _sortList = result.list!;
-        } else {
-          _sortList.addAll(result.list!);
-        }
-        _currentPage = page;
-        _hasMore = result.list!.isNotEmpty &&
-                   (result.totalPage == null || page < result.totalPage!);
-        _errorMessage = null;
-      } else {
-        _hasMore = false;
-      }
-    } catch (e) {
-      _errorMessage = '获取排行榜失败';
-      print('获取排行榜失败: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
+    if (page == 1) {
+      _isLoading = true;
     }
+    notifyListeners();
+
+    await HomeApi.getSortShopList(
+      page: page,
+      onSuccess: (result) {
+        if (result != null && result.list != null) {
+          if (page == 1) {
+            _sortList = result.list!;
+          } else {
+            _sortList.addAll(result.list!);
+          }
+          _currentPage = page;
+          _hasMore = result.list!.isNotEmpty &&
+                     (result.totalPage == null || page < result.totalPage!);
+          _errorMessage = null;
+        } else {
+          _hasMore = false;
+        }
+        _isLoading = false;
+        notifyListeners();
+      },
+      onError: (exception) {
+        _errorMessage = '获取排行榜失败';
+        print('获取排行榜失败: $exception');
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
   }
 }

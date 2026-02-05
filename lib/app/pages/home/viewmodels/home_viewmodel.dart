@@ -62,44 +62,52 @@ class HomeViewModel extends ChangeNotifier {
 
   /// 获取首页顶部数据
   Future<void> fetchHomeData() async {
-    try {
-      _isLoading = true;
-      notifyListeners();
+    _isLoading = true;
+    notifyListeners();
 
-      final result = await HomeApi.getHomeData();
-      if (result != null) {
-        _homeData = result;
-        _errorMessage = null;
-      }
-    } catch (e) {
-      _errorMessage = '获取首页数据失败';
-      print('获取首页数据失败: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    await HomeApi.getHomeData(
+      onSuccess: (result) {
+        if (result != null) {
+          _homeData = result;
+          _errorMessage = null;
+        }
+        _isLoading = false;
+        notifyListeners();
+      },
+      onError: (exception) {
+        _errorMessage = '获取首页数据失败';
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
   }
 
   /// 获取商品列表
   Future<void> fetchProductList(int page) async {
-    try {
-      final result = await HomeApi.getHomeRecommendList(page: page);
-      if (result != null && result.list != null) {
-        if (page == 1) {
-          _productList = result.list!;
+    await HomeApi.getHomeRecommendList(
+      page: page,
+      onSuccess: (result) {
+        if (result != null && result.list != null) {
+          print("获取商品列表成功${result.list}");
+          if (page == 1) {
+            _productList = result.list!;
+          } else {
+            _productList.addAll(result.list!);
+          }
+          _currentPage = page;
+          _hasMore = result.list!.isNotEmpty &&
+                     (result.totalPage == null || page < result.totalPage!);
+          _errorMessage = null;
         } else {
-          _productList.addAll(result.list!);
+          _hasMore = false;
         }
-        _currentPage = page;
-        _hasMore = result.list!.isNotEmpty &&
-                   (result.totalPage == null || page < result.totalPage!);
-        _errorMessage = null;
-      } else {
-        _hasMore = false;
-      }
-    } catch (e) {
-      _errorMessage = '获取商品列表失败';
-      print('获取商品列表失败: $e');
-    }
+        notifyListeners();
+      },
+      onError: (exception) {
+        _errorMessage = '获取商品列表失败';
+        print("获取商品列表失败");
+        notifyListeners();
+      },
+    );
   }
 }

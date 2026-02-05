@@ -138,13 +138,6 @@ class FrameworkInitializer {
       );
     }
 
-    // 4. 添加全局错误处理（如果提供了回调）
-    if (config.onError != null) {
-      HttpClient.instance.addErrorInterceptor(
-        onError: config.onError,
-      );
-    }
-
     _networkInitialized = true;
     print('✅ 网络框架初始化完成');
   }

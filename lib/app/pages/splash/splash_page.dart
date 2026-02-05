@@ -59,12 +59,15 @@ class _SplashPageState extends State<SplashPage> {
     );
 
     // 从服务器获取启动图片URL
-    final splashImageUrl = await SplashApi.getSplashImage();
-    if (splashImageUrl != null && splashImageUrl.isNotEmpty) {
-      setState(() {
-        _splashImageUrl = splashImageUrl;
-      });
-    }
+    SplashApi.getSplashImage(
+      onSuccess: (splashImageUrl) {
+        if (splashImageUrl != null && splashImageUrl.isNotEmpty) {
+          setState(() {
+            _splashImageUrl = splashImageUrl;
+          });
+        }
+      },
+    );
 
     // 获取用户信用详情
     SplashApi.getUserCreditDetail();
@@ -95,26 +98,32 @@ class _SplashPageState extends State<SplashPage> {
 
   /// 检查应用更新
   Future<void> _checkAppUpdate() async {
-    final updateInfo = await SplashApi.checkAppUpdate();
+    SplashApi.checkAppUpdate(
+      onSuccess: (updateInfo) {
+        if (updateInfo != null && updateInfo.versionCode != null) {
+          // TODO: 获取当前应用版本号进行比较
+          // 这里暂时假设需要更新
+          final needUpdate = false; // updateInfo.versionCode! > currentVersionCode
 
-    if (updateInfo != null && updateInfo.versionCode != null) {
-      // TODO: 获取当前应用版本号进行比较
-      // 这里暂时假设需要更新
-      final needUpdate = false; // updateInfo.versionCode! > currentVersionCode
-
-      if (needUpdate) {
-        // TODO: 显示更新弹窗
-        print('发现新版本: ${updateInfo.versionName}');
-        // 暂时不阻塞，继续倒计时
+          if (needUpdate) {
+            // TODO: 显示更新弹窗
+            print('发现新版本: ${updateInfo.versionName}');
+            // 暂时不阻塞，继续倒计时
+            _startCountdown();
+          } else {
+            // 不需要更新，开始倒计时
+            _startCountdown();
+          }
+        } else {
+          // 检查更新失败，继续倒计时
+          _startCountdown();
+        }
+      },
+      onError: (exception) {
+        // 检查更新失败，继续倒计时
         _startCountdown();
-      } else {
-        // 不需要更新，开始倒计时
-        _startCountdown();
-      }
-    } else {
-      // 检查更新失败，继续倒计时
-      _startCountdown();
-    }
+      },
+    );
   }
 
   /// 跳转到首页

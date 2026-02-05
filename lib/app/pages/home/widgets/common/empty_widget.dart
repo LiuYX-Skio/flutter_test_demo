@@ -18,10 +18,10 @@ class EmptyWidget extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            icon ?? Icons.inbox_outlined,
-            size: 64.w,
-            color: Colors.grey[400],
+          Image.asset(
+            'assets/images/home_auth_hint.png',
+            width: 24.w,
+            height: 24.w,
           ),
           SizedBox(height: 16.h),
           Text(

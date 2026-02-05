@@ -63,44 +63,52 @@ class MineViewModel extends ChangeNotifier {
 
   /// 获取用户信息
   Future<void> fetchUserInfo() async {
-    try {
-      _isLoading = true;
-      notifyListeners();
+    _isLoading = true;
+    notifyListeners();
 
-      final result = await UserApi.getUserInfo();
-      if (result != null) {
-        _userInfo = result;
-        _errorMessage = null;
-      }
-    } catch (e) {
-      _errorMessage = '获取用户信息失败';
-      print('获取用户信息失败: $e');
-    } finally {
-      _isLoading = false;
-      notifyListeners();
-    }
+    await UserApi.getUserInfo(
+      onSuccess: (result) {
+        if (result != null) {
+          _userInfo = result;
+          _errorMessage = null;
+        }
+        _isLoading = false;
+        notifyListeners();
+      },
+      onError: (exception) {
+        _errorMessage = '获取用户信息失败';
+        print('获取用户信息失败: $exception');
+        _isLoading = false;
+        notifyListeners();
+      },
+    );
   }
 
   /// 获取推荐商品列表
   Future<void> fetchProductList(int page) async {
-    try {
-      final result = await ProductApi.getHotProducts(page: page);
-      if (result != null && result.list != null) {
-        if (page == 1) {
-          _productList = result.list!;
+    await ProductApi.getHotProducts(
+      page: page,
+      onSuccess: (result) {
+        if (result != null && result.list != null) {
+          if (page == 1) {
+            _productList = result.list!;
+          } else {
+            _productList.addAll(result.list!);
+          }
+          _currentPage = page;
+          _hasMore = result.list!.isNotEmpty &&
+                     (result.totalPage == null || page < result.totalPage!);
+          _errorMessage = null;
         } else {
-          _productList.addAll(result.list!);
+          _hasMore = false;
         }
-        _currentPage = page;
-        _hasMore = result.list!.isNotEmpty &&
-                   (result.totalPage == null || page < result.totalPage!);
-        _errorMessage = null;
-      } else {
-        _hasMore = false;
-      }
-    } catch (e) {
-      _errorMessage = '获取推荐商品失败';
-      print('获取推荐商品失败: $e');
-    }
+        notifyListeners();
+      },
+      onError: (exception) {
+        _errorMessage = '获取推荐商品失败';
+        print('获取推荐商品失败: $exception');
+        notifyListeners();
+      },
+    );
   }
 }

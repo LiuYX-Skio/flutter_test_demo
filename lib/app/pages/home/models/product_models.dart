@@ -10,15 +10,19 @@ class ProductEntity {
   final int? id;
 
   /// 商品名称
+  @JsonKey(name: 'storeName')
   final String? name;
 
   /// 商品图片URL
+  @JsonKey(name: 'image')
   final String? imageUrl;
 
   /// 商品价格
+  @JsonKey(fromJson: _stringToDouble)
   final double? price;
 
   /// 原价
+  @JsonKey(name: 'otPrice', fromJson: _stringToDouble)
   final double? originalPrice;
 
   /// 商品描述
@@ -28,6 +32,7 @@ class ProductEntity {
   final int? stock;
 
   /// 销售数量
+  @JsonKey(name: 'sales')
   final int? salesCount;
 
   /// 商品标签
@@ -53,14 +58,23 @@ class ProductEntity {
       _$ProductEntityFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProductEntityToJson(this);
+
+  /// 将字符串或数字转换为 double
+  static double? _stringToDouble(dynamic value) {
+    if (value == null) return null;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value);
+    return null;
+  }
 }
 
 /// 分页数据包装器
-/// 对应 Android 的 ShopOutEntity<T>
-@JsonSerializable(genericArgumentFactories: true)
-class ShopOutEntity<T> {
+/// 对应 Android 的 ShopOutEntity
+@JsonSerializable()
+class ShopOutEntity {
   /// 数据列表
-  final List<T>? list;
+  final List<ProductEntity>? list;
 
   /// 每页数量
   final int? limit;
@@ -82,12 +96,8 @@ class ShopOutEntity<T> {
     this.totalPage,
   });
 
-  factory ShopOutEntity.fromJson(
-    Map<String, dynamic> json,
-    T Function(Object? json) fromJsonT,
-  ) =>
-      _$ShopOutEntityFromJson(json, fromJsonT);
+  factory ShopOutEntity.fromJson(Map<String, dynamic> json) =>
+      _$ShopOutEntityFromJson(json);
 
-  Map<String, dynamic> toJson(Object Function(T value) toJsonT) =>
-      _$ShopOutEntityToJson(this, toJsonT);
+  Map<String, dynamic> toJson() => _$ShopOutEntityToJson(this);
 }

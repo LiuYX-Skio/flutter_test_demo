@@ -4,14 +4,12 @@ import 'api_response.dart';
 import 'http_config.dart';
 import 'json_converter_registry.dart';
 import 'interceptors/auth_interceptor.dart';
-import 'interceptors/error_interceptor.dart';
 import 'interceptors/log_interceptor.dart' as custom;
 
 /// HTTP 客户端（单例）
 class HttpClient {
   static HttpClient? _instance;
   late Dio _dio;
-  HttpConfig? _config;
 
   /// 获取单例
   static HttpClient get instance {
@@ -23,7 +21,6 @@ class HttpClient {
 
   /// 初始化配置
   void init(HttpConfig config) {
-    _config = config;
     _dio = Dio(
       BaseOptions(
         baseUrl: config.baseUrl,
@@ -56,15 +53,6 @@ class HttpClient {
     );
   }
 
-  /// 添加错误拦截器
-  void addErrorInterceptor({
-    void Function(ApiException exception)? onError,
-  }) {
-    _dio.interceptors.add(
-      ErrorInterceptor(errorHandler: onError),
-    );
-  }
-
   /// 添加自定义拦截器
   void addInterceptor(Interceptor interceptor) {
     _dio.interceptors.add(interceptor);
@@ -74,13 +62,16 @@ class HttpClient {
   Dio get dio => _dio;
 
   /// 通用请求方法
-  Future<T> _request<T>(String path, {
+  Future<T?> _request<T>(
+    String path, {
     required String method,
     Map<String, dynamic>? queryParameters,
     dynamic data,
     Options? options,
     CancelToken? cancelToken,
     T Function(dynamic json)? fromJsonT,
+    void Function(T? data)? onSuccess,
+    void Function(ApiException exception)? onError,
   }) async {
     try {
       final response = await _dio.request(
@@ -97,9 +88,8 @@ class HttpClient {
 
       // 如果响应数据是 Map，尝试解析为 ApiResponse
       if (response.data is Map<String, dynamic>) {
-        // 优先使用传入的 fromJsonT，否则从注册表获取
-        final converter = fromJsonT ?? JsonConverterRegistry().getConverter<T>();
-
+        final converter =
+            fromJsonT ?? JsonConverterRegistry().getConverter<T>();
         final apiResponse = ApiResponse<T>.fromJson(
           response.data as Map<String, dynamic>,
           fromJsonT: converter,
@@ -107,34 +97,69 @@ class HttpClient {
 
         // 检查业务状态码
         if (!apiResponse.isSuccess) {
-          throw ApiException.business(
+          final exception = ApiException.business(
             code: apiResponse.code,
             message: apiResponse.message,
           );
+          if (onError != null) {
+            onError(exception);
+          }
+          return null;
         }
 
-        return apiResponse.data as T;
+        if (onSuccess != null) {
+          onSuccess(apiResponse.data);
+        }
+        return apiResponse.data;
       }
 
-      // 直接返回数据
-      return response.data as T;
+      // 如果响应数据是 List，直接处理
+      if (response.data is List) {
+        T? result;
+        if (fromJsonT != null) {
+          result = fromJsonT(response.data);
+        } else {
+          result = JsonConverterRegistry().convert<T>(response.data);
+        }
+        if (onSuccess != null) {
+          onSuccess(result);
+        }
+        return result;
+      }
+
+      // 其他类型直接返回
+      if (onSuccess != null) {
+        onSuccess(null);
+      }
+      return null;
     } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
+      final exception = ApiException.fromDioException(e);
+      if (onError != null) {
+        onError(exception);
+      }
+      return null;
     } catch (e) {
-      throw ApiException(
+      final exception = ApiException(
         type: ApiExceptionType.unknown,
         message: e.toString(),
         originalError: e,
       );
+      if (onError != null) {
+        onError(exception);
+      }
+      return null;
     }
   }
 
   /// GET 请求
-  Future<T> get<T>(String path, {
+  Future<T?> get<T>(
+    String path, {
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
     T Function(dynamic json)? fromJsonT,
+    void Function(T? data)? onSuccess,
+    void Function(ApiException exception)? onError,
   }) {
     return _request<T>(
       path,
@@ -143,16 +168,21 @@ class HttpClient {
       options: options,
       cancelToken: cancelToken,
       fromJsonT: fromJsonT,
+      onSuccess: onSuccess,
+      onError: onError,
     );
   }
 
   /// POST 请求
-  Future<T> post<T>(String path, {
+  Future<T?> post<T>(
+    String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
     T Function(dynamic json)? fromJsonT,
+    void Function(T? data)? onSuccess,
+    void Function(ApiException exception)? onError,
   }) {
     return _request<T>(
       path,
@@ -162,16 +192,21 @@ class HttpClient {
       options: options,
       cancelToken: cancelToken,
       fromJsonT: fromJsonT,
+      onSuccess: onSuccess,
+      onError: onError,
     );
   }
 
   /// PUT 请求
-  Future<T> put<T>(String path, {
+  Future<T?> put<T>(
+    String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
     T Function(dynamic json)? fromJsonT,
+    void Function(T? data)? onSuccess,
+    void Function(ApiException exception)? onError,
   }) {
     return _request<T>(
       path,
@@ -181,16 +216,21 @@ class HttpClient {
       options: options,
       cancelToken: cancelToken,
       fromJsonT: fromJsonT,
+      onSuccess: onSuccess,
+      onError: onError,
     );
   }
 
   /// DELETE 请求
-  Future<T> delete<T>(String path, {
+  Future<T?> delete<T>(
+    String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
     T Function(dynamic json)? fromJsonT,
+    void Function(T? data)? onSuccess,
+    void Function(ApiException exception)? onError,
   }) {
     return _request<T>(
       path,
@@ -200,16 +240,21 @@ class HttpClient {
       options: options,
       cancelToken: cancelToken,
       fromJsonT: fromJsonT,
+      onSuccess: onSuccess,
+      onError: onError,
     );
   }
 
   /// PATCH 请求
-  Future<T> patch<T>(String path, {
+  Future<T?> patch<T>(
+    String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
     Options? options,
     CancelToken? cancelToken,
     T Function(dynamic json)? fromJsonT,
+    void Function(T? data)? onSuccess,
+    void Function(ApiException exception)? onError,
   }) {
     return _request<T>(
       path,
@@ -219,11 +264,13 @@ class HttpClient {
       options: options,
       cancelToken: cancelToken,
       fromJsonT: fromJsonT,
+      onSuccess: onSuccess,
+      onError: onError,
     );
   }
 
   /// 上传文件
-  Future<T> upload<T>(
+  Future<T?> upload<T>(
     String path,
     String filePath, {
     String? fileName,
@@ -231,13 +278,12 @@ class HttpClient {
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
     T Function(dynamic json)? fromJsonT,
+    void Function(T? data)? onSuccess,
+    void Function(ApiException exception)? onError,
   }) async {
     try {
       final formData = FormData.fromMap({
-        'file': await MultipartFile.fromFile(
-          filePath,
-          filename: fileName,
-        ),
+        'file': await MultipartFile.fromFile(filePath, filename: fileName),
         ...?data,
       });
 
@@ -250,9 +296,8 @@ class HttpClient {
 
       // 如果响应数据是 Map，尝试解析为 ApiResponse
       if (response.data is Map<String, dynamic>) {
-        // 优先使用传入的 fromJsonT，否则从注册表获取
-        final converter = fromJsonT ?? JsonConverterRegistry().getConverter<T>();
-
+        final converter =
+            fromJsonT ?? JsonConverterRegistry().getConverter<T>();
         final apiResponse = ApiResponse<T>.fromJson(
           response.data as Map<String, dynamic>,
           fromJsonT: converter,
@@ -260,25 +305,58 @@ class HttpClient {
 
         // 检查业务状态码
         if (!apiResponse.isSuccess) {
-          throw ApiException.business(
+          final exception = ApiException.business(
             code: apiResponse.code,
             message: apiResponse.message,
           );
+          if (onError != null) {
+            onError(exception);
+          }
+          return null;
         }
 
-        return apiResponse.data as T;
+        if (onSuccess != null) {
+          onSuccess(apiResponse.data);
+        }
+        return apiResponse.data;
       }
 
-      // 直接返回数据
-      return response.data as T;
+      // 如果响应数据是 List，直接处理
+      if (response.data is List) {
+        T? result;
+        if (fromJsonT != null) {
+          result = fromJsonT(response.data);
+        } else {
+          result = JsonConverterRegistry().convert<T>(response.data);
+        }
+        if (onSuccess != null) {
+          onSuccess(result);
+        }
+        return result;
+      }
+
+      // 其他类型直接返回
+      final result = response.data as T?;
+      if (onSuccess != null) {
+        onSuccess(result);
+      }
+      return result;
     } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
+      final exception = ApiException.fromDioException(e);
+      if (onError != null) {
+        onError(exception);
+      }
+      return null;
     } catch (e) {
-      throw ApiException(
+      final exception = ApiException(
         type: ApiExceptionType.unknown,
         message: e.toString(),
         originalError: e,
       );
+      if (onError != null) {
+        onError(exception);
+      }
+      return null;
     }
   }
 
@@ -289,6 +367,7 @@ class HttpClient {
     ProgressCallback? onReceiveProgress,
     CancelToken? cancelToken,
     Map<String, dynamic>? queryParameters,
+    void Function(ApiException exception)? onError,
   }) async {
     try {
       await _dio.download(
@@ -299,7 +378,10 @@ class HttpClient {
         cancelToken: cancelToken,
       );
     } on DioException catch (e) {
-      throw ApiException.fromDioException(e);
+      final exception = ApiException.fromDioException(e);
+      if (onError != null) {
+        onError(exception);
+      }
     }
   }
 }

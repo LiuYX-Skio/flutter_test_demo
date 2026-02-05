@@ -11,6 +11,7 @@ class HomeTitleDataEntity {
   final List<BannerEntity>? banner;
 
   /// 菜单分类列表
+  @JsonKey(name: 'menus')
   final List<MenuCategoryEntity>? menuCategoryList;
 
   /// 爆款商品
@@ -39,13 +40,12 @@ class BannerEntity {
   /// 轮播图ID
   final int? id;
 
-  /// 图片URL
+  /// 图片URL (API字段名为linkUrl)
+  @JsonKey(name: 'linkUrl')
   final String? imageUrl;
 
-  /// 跳转链接
-  final String? linkUrl;
-
   /// 标题
+  @JsonKey(name: 'name')
   final String? title;
 
   /// 排序
@@ -54,7 +54,6 @@ class BannerEntity {
   BannerEntity({
     this.id,
     this.imageUrl,
-    this.linkUrl,
     this.title,
     this.sort,
   });
@@ -76,13 +75,18 @@ class MenuCategoryEntity {
   final String? name;
 
   /// 图标URL
+  @JsonKey(name: 'pic')
   final String? iconUrl;
 
   /// 跳转链接
+  @JsonKey(name: 'url')
   final String? linkUrl;
 
   /// 排序
   final int? sort;
+
+  /// 显示状态
+  final int? show;
 
   MenuCategoryEntity({
     this.id,
@@ -90,6 +94,7 @@ class MenuCategoryEntity {
     this.iconUrl,
     this.linkUrl,
     this.sort,
+    this.show,
   });
 
   factory MenuCategoryEntity.fromJson(Map<String, dynamic> json) =>

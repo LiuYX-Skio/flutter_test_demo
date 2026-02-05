@@ -53,41 +53,47 @@ class MainViewModel extends ChangeNotifier {
 
   /// 获取用户信息
   Future<void> fetchUserInfo() async {
-    try {
-      final result = await UserApi.getUserInfo();
-      if (result != null) {
-        _userInfo = result;
-        notifyListeners();
-      }
-    } catch (e) {
-      print('获取用户信息失败: $e');
-    }
+    await UserApi.getUserInfo(
+      onSuccess: (result) {
+        if (result != null) {
+          _userInfo = result;
+          notifyListeners();
+        }
+      },
+      onError: (exception) {
+        print('获取用户信息失败: $exception');
+      },
+    );
   }
 
   /// 获取默认地址
   Future<void> fetchDefaultAddress() async {
-    try {
-      final result = await UserApi.getDefaultAddress();
-      if (result != null) {
-        _defaultAddress = result;
-        notifyListeners();
-      }
-    } catch (e) {
-      print('获取默认地址失败: $e');
-    }
+    await UserApi.getDefaultAddress(
+      onSuccess: (result) {
+        if (result != null) {
+          _defaultAddress = result;
+          notifyListeners();
+        }
+      },
+      onError: (exception) {
+        print('获取默认地址失败: $exception');
+      },
+    );
   }
 
   /// 获取用户信用详情
   Future<void> fetchUserCreditDetail() async {
-    try {
-      final result = await UserApi.getUserCreditDetail();
-      if (result != null) {
-        _userCreditDetail = result;
-        notifyListeners();
-      }
-    } catch (e) {
-      print('获取用户信用详情失败: $e');
-    }
+    await UserApi.getUserCreditDetail(
+      onSuccess: (result) {
+        if (result != null) {
+          _userCreditDetail = result;
+          notifyListeners();
+        }
+      },
+      onError: (exception) {
+        print('获取用户信用详情失败: $exception');
+      },
+    );
   }
 
   /// 设置加载状态

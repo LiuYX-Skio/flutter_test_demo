@@ -78,12 +78,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
             items: [
               BottomNavigationBarItem(
                 icon: Image.asset(
-                  'assets/images/ic_menu_tab1.webp',
+                  'assets/images/ic_menu_tab1.png',
                   width: 24.w,
                   height: 24.w,
                 ),
                 activeIcon: Image.asset(
-                  'assets/images/ic_menu_tab1_p.webp',
+                  'assets/images/ic_menu_tab1_p.png',
                   width: 24.w,
                   height: 24.w,
                 ),
@@ -91,12 +91,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
               ),
               BottomNavigationBarItem(
                 icon: Image.asset(
-                  'assets/images/ic_menu_tab2.webp',
+                  'assets/images/ic_menu_tab2.png',
                   width: 24.w,
                   height: 24.w,
                 ),
                 activeIcon: Image.asset(
-                  'assets/images/ic_menu_tab2_p.webp',
+                  'assets/images/ic_menu_tab2_p.png',
                   width: 24.w,
                   height: 24.w,
                 ),
@@ -104,12 +104,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
               ),
               BottomNavigationBarItem(
                 icon: Image.asset(
-                  'assets/images/ic_menu_tab3.webp',
+                  'assets/images/ic_menu_tab3.png',
                   width: 24.w,
                   height: 24.w,
                 ),
                 activeIcon: Image.asset(
-                  'assets/images/ic_menu_tab3_p.webp',
+                  'assets/images/ic_menu_tab3_p.png',
                   width: 24.w,
                   height: 24.w,
                 ),
@@ -117,12 +117,12 @@ class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
               ),
               BottomNavigationBarItem(
                 icon: Image.asset(
-                  'assets/images/ic_menu_tab4.webp',
+                  'assets/images/ic_menu_tab4.png',
                   width: 24.w,
                   height: 24.w,
                 ),
                 activeIcon: Image.asset(
-                  'assets/images/ic_menu_tab4_p.webp',
+                  'assets/images/ic_menu_tab4_p.png',
                   width: 24.w,
                   height: 24.w,
                 ),

@@ -25,21 +25,43 @@ class ApiResponse<T> {
     Map<String, dynamic> json, {
     T Function(dynamic json)? fromJsonT,
   }) {
+    final code = json['code'] as int? ?? json['status'] as int? ?? 0;
+    final message = json['message'] as String? ?? json['msg'] as String? ?? '';
+
     // 处理 data 字段的转换
     T? convertedData;
-    if (json['data'] != null) {
-      if (fromJsonT != null) {
-        // 优先使用提供的转换函数
-        convertedData = fromJsonT(json['data']);
+    final data = json['data'];
+
+    // 只有当 data 不为 null 且不是空字符串时才尝试转换
+    if (data != null && data != '') {
+      // 如果 data 是基本类型（String, int, double, bool），直接尝试转换
+      if (data is String || data is int || data is double || data is bool) {
+        try {
+          convertedData = data as T?;
+        } catch (e) {
+          convertedData = null;
+        }
       } else {
-        // 使用注册表的转换方法（支持基本类型和已注册的实体类）
-        convertedData = JsonConverterRegistry().convert<T>(json['data']);
+        // data 是复杂类型（Map 或 List），使用转换器
+        if (fromJsonT != null) {
+          try {
+            convertedData = fromJsonT(data);
+          } catch (e) {
+            convertedData = null;
+          }
+        } else {
+          try {
+            convertedData = JsonConverterRegistry().convert<T>(data);
+          } catch (e) {
+            convertedData = null;
+          }
+        }
       }
     }
 
     return ApiResponse<T>(
-      code: json['code'] as int? ?? json['status'] as int? ?? 0,
-      message: json['message'] as String? ?? json['msg'] as String? ?? '',
+      code: code,
+      message: message,
       data: convertedData,
     );
   }
