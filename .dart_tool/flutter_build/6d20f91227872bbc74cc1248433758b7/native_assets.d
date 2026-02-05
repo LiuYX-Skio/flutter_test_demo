@@ -1,0 +1,1 @@
+ /Users/liujian/AndroidStudioProjects/company/flutter_test_demo/.dart_tool/flutter_build/6d20f91227872bbc74cc1248433758b7/native_assets.yaml: 
