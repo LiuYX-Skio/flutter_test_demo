@@ -3,6 +3,7 @@ import '../app/pages/home/models/home_models.dart';
 import '../app/pages/home/models/product_models.dart';
 import '../app/pages/home/models/user_models.dart';
 import '../app/pages/home/models/address_models.dart';
+import '../app/pages/detail/models/shop_detail_models.dart';
 import 'json_converter_registry.dart';
 
 /// 网络框架初始化器
@@ -26,7 +27,15 @@ class NetworkInitializer {
 
     // 注册首页相关实体
     registry.register<HomeTitleDataEntity>(
-      (json) => HomeTitleDataEntity.fromJson(json as Map<String, dynamic>),
+      (json) {
+        print('HomeTitleDataEntity converter - json type: ${json.runtimeType}');
+        if (json is! Map<String, dynamic>) {
+          print('ERROR: Expected Map but got ${json.runtimeType}');
+          print('JSON content: $json');
+          throw ArgumentError('Expected Map<String, dynamic> but got ${json.runtimeType}');
+        }
+        return HomeTitleDataEntity.fromJson(json);
+      },
     );
 
     registry.register<BannerEntity>(
@@ -35,6 +44,10 @@ class NetworkInitializer {
 
     registry.register<MenuCategoryEntity>(
       (json) => MenuCategoryEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.register<ExplosiveMoneyEntity>(
+      (json) => ExplosiveMoneyEntity.fromJson(json as Map<String, dynamic>),
     );
 
     // 注册商品相关实体
@@ -59,6 +72,43 @@ class NetworkInitializer {
     // 注册地址实体
     registry.register<AddressEntity>(
       (json) => AddressEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    // 注册商品详情相关实体
+    registry.register<ShopDetailEntity>(
+      (json) => ShopDetailEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.register<ShopInfoEntity>(
+      (json) => ShopInfoEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.register<ProduceValueEntity>(
+      (json) => ProduceValueEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.register<ShopAttrEntity>(
+      (json) => ShopAttrEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.register<ShopAttrListEntity>(
+      (json) => ShopAttrListEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.register<ShopCommentEntity>(
+      (json) => ShopCommentEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.register<ShopCommentDetailEntity>(
+      (json) => ShopCommentDetailEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.register<ShopCommentOutEntity>(
+      (json) => ShopCommentOutEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.register<ShopCarSumEntity>(
+      (json) => ShopCarSumEntity.fromJson(json as Map<String, dynamic>),
     );
 
     // 注册基本类型（String 类型特殊处理）
@@ -93,6 +143,10 @@ class NetworkInitializer {
       (json) => MenuCategoryEntity.fromJson(json as Map<String, dynamic>),
     );
 
+    registry.registerListItem<ExplosiveMoneyEntity>(
+      (json) => ExplosiveMoneyEntity.fromJson(json as Map<String, dynamic>),
+    );
+
     // 注册商品相关实体的 List 转换器
     registry.registerListItem<ProductEntity>(
       (json) => ProductEntity.fromJson(json as Map<String, dynamic>),
@@ -110,6 +164,43 @@ class NetworkInitializer {
     // 注册地址实体的 List 转换器
     registry.registerListItem<AddressEntity>(
       (json) => AddressEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    // 注册商品详情相关实体的 List 转换器
+    registry.registerListItem<ShopDetailEntity>(
+      (json) => ShopDetailEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.registerListItem<ShopInfoEntity>(
+      (json) => ShopInfoEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.registerListItem<ProduceValueEntity>(
+      (json) => ProduceValueEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.registerListItem<ShopAttrEntity>(
+      (json) => ShopAttrEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.registerListItem<ShopAttrListEntity>(
+      (json) => ShopAttrListEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.registerListItem<ShopCommentEntity>(
+      (json) => ShopCommentEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.registerListItem<ShopCommentDetailEntity>(
+      (json) => ShopCommentDetailEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.registerListItem<ShopCommentOutEntity>(
+      (json) => ShopCommentOutEntity.fromJson(json as Map<String, dynamic>),
+    );
+
+    registry.registerListItem<ShopCarSumEntity>(
+      (json) => ShopCarSumEntity.fromJson(json as Map<String, dynamic>),
     );
   }
 }

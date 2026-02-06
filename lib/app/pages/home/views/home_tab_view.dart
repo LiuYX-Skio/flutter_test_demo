@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../models/product_models.dart';
 import '../viewmodels/home_viewmodel.dart';
 import '../widgets/common/loading_widget.dart';
 import '../widgets/common/error_widget.dart';
-import '../widgets/common/empty_widget.dart';
 import '../widgets/common/refresh_list_widget.dart';
 import '../widgets/home/banner_widget.dart';
 import '../widgets/home/menu_grid_widget.dart';
-import '../widgets/home/product_list_widget.dart';
+import '../../../../navigation/core/navigator_service.dart';
+import '../../../../navigation/core/route_paths.dart';
 
 /// 首页Tab视图
 class HomeTabView extends StatefulWidget {
@@ -50,10 +51,7 @@ class _HomeTabViewState extends State<HomeTabView>
     super.build(context);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('首页'),
-        centerTitle: true,
-      ),
+      backgroundColor: const Color(0xFFF7F9FC), // color_F7F9FC
       body: Consumer<HomeViewModel>(
         builder: (context, viewModel, child) {
           // 首次加载
@@ -74,53 +72,40 @@ class _HomeTabViewState extends State<HomeTabView>
             onRefresh: _onRefresh,
             onLoading: _onLoading,
             enablePullUp: viewModel.hasMore,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // 轮播图
-                  if (viewModel.homeData?.banner != null &&
-                      viewModel.homeData!.banner!.isNotEmpty)
-                    Padding(
-                      padding: EdgeInsets.only(top: 16.h),
-                      child: BannerWidget(
-                        banners: viewModel.homeData!.banner!,
-                        onTap: (banner) {
-                          print('点击轮播图: ${banner.title}');
-                        },
-                      ),
-                    ),
+            child: CustomScrollView(
+              slivers: [
+                // 自定义顶部（包含搜索框、Banner、分类菜单）
+                SliverToBoxAdapter(
+                  child: _buildHomeHeader(viewModel),
+                ),
 
-                  // 菜单网格
-                  if (viewModel.homeData?.menuCategoryList != null &&
-                      viewModel.homeData!.menuCategoryList!.isNotEmpty)
-                    MenuGridWidget(
-                      menus: viewModel.homeData!.menuCategoryList!,
-                      onTap: (menu) {
-                        print('点击菜单: ${menu.name}');
+                // 商品网格列表
+                SliverPadding(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                  sliver: SliverGrid(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 8.h,
+                      crossAxisSpacing: 8.w,
+                      mainAxisExtent: 270.h, // item 固定高度
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        if (index < viewModel.productList.length) {
+                          final product = viewModel.productList[index];
+                          return _buildProductItem(product);
+                        }
+                        return null;
                       },
+                      childCount: viewModel.productList.length,
                     ),
+                  ),
+                ),
 
-                  // 公告
-                  if (viewModel.homeData?.noticeContent != null)
-                    _buildNotice(viewModel.homeData!.noticeContent!),
-
-                  // 商品列表标题
-                  _buildSectionTitle('推荐商品'),
-
-                  // 商品列表
-                  if (viewModel.productList.isEmpty)
-                    const EmptyWidget(message: '暂无商品')
-                  else
-                    ProductListWidget(
-                      products: viewModel.productList,
-                      onTap: (product) {
-                        print('点击商品: ${product.name}');
-                      },
-                    ),
-
-                  SizedBox(height: 16.h),
-                ],
-              ),
+                SliverToBoxAdapter(
+                  child: SizedBox(height: 16.h),
+                ),
+              ],
             ),
           );
         },
@@ -128,48 +113,202 @@ class _HomeTabViewState extends State<HomeTabView>
     );
   }
 
-  Widget _buildNotice(String notice) {
+  /// 构建首页头部（包含搜索框、Banner、分类菜单）
+  Widget _buildHomeHeader(HomeViewModel viewModel) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: Colors.orange[50],
-        borderRadius: BorderRadius.circular(8.r),
+        color: Colors.white,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(6.r),
+          bottomRight: Radius.circular(6.r),
+        ),
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Icon(
-            Icons.campaign,
-            color: Colors.orange,
-            size: 20.w,
-          ),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              notice,
-              style: TextStyle(
-                fontSize: 13.sp,
-                color: Colors.orange[800],
+          // 顶部渐变背景 (203dp高度)
+          Container(
+            height: 203.h,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFFFF4843), Color(0xFFFF3530)],
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
             ),
+          ),
+
+          Column(
+            children: [
+              // 搜索框和消息图标 (marginTop: 46dp)
+              Container(
+                margin: EdgeInsets.only(left: 12.w, top: 46.h, right: 12.w),
+                child: Row(
+                  children: [
+                    // 搜索框
+                    Expanded(
+                      child: Container(
+                        height: 34.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(17.r),
+                        ),
+                        child: Row(
+                          children: [
+                            SizedBox(width: 12.w),
+                            Image.asset(
+                              'assets/images/home_search.png',
+                              width: 16.w,
+                              height: 16.w,
+                            ),
+                            SizedBox(width: 8.w),
+                            Text(
+                              '搜索商品',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                color: const Color(0xFF999999),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 12.w),
+                    // 消息图标
+                    Image.asset(
+                      'assets/images/home_message.png',
+                      width: 22.w,
+                      height: 22.w,
+                    ),
+                  ],
+                ),
+              ),
+
+              // Banner (marginTop: 16dp, height: 140dp)
+              if (viewModel.homeData?.banner != null &&
+                  viewModel.homeData!.banner!.isNotEmpty)
+                Container(
+                  margin: EdgeInsets.only(left: 12.w, top: 16.h, right: 12.w),
+                  height: 140.h,
+                  child: BannerWidget(
+                    banners: viewModel.homeData!.banner!,
+                    onTap: (banner) {
+                      print('点击轮播图: ${banner.title}');
+                    },
+                  ),
+                ),
+
+              // 分类菜单 (marginTop: 20dp)
+              if (viewModel.homeData?.menuCategoryList != null &&
+                  viewModel.homeData!.menuCategoryList!.isNotEmpty)
+                Container(
+                  margin: EdgeInsets.only(top: 20.h),
+                  child: MenuGridWidget(
+                    menus: viewModel.homeData!.menuCategoryList!,
+                    onTap: (menu) {
+                      print('点击菜单: ${menu.name}');
+                    },
+                  ),
+                ),
+
+              SizedBox(height: 12.h),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionTitle(String title) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-      alignment: Alignment.centerLeft,
-      child: Text(
-        title,
-        style: TextStyle(
-          fontSize: 16.sp,
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
+  /// 构建商品项
+  Widget _buildProductItem(ProductEntity product) {
+    return GestureDetector(
+      onTap: () {
+        // 导航到商品详情页
+        context.push(
+          RoutePaths.product.detail,
+          arguments: {'id': product.id},
+        );
+      },
+      child: Container(
+        width: 171.w,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(6.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 商品图片 (170dp高度)
+            ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(6.r),
+                topRight: Radius.circular(6.r),
+              ),
+              child: Image.network(
+                product.imageUrl ?? '',
+                width: double.infinity,
+                height: 170.h,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    width: double.infinity,
+                    height: 170.h,
+                    color: const Color(0xFFCCCCCC),
+                  );
+                },
+              ),
+            ),
+
+            // 商品标题
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+              child: Text(
+                product.name ?? '',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF333333),
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+
+            // 价格和购物车
+            Padding(
+              padding: EdgeInsets.only(left: 10.w, right: 10.w, bottom: 9.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          '¥',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: const Color(0xFFFF3530),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          product.price?.toString() ?? '0',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            color: const Color(0xFFFF3530),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Image.asset(
+                    'assets/images/icon_shop_car.webp',
+                    width: 24.w,
+                    height: 24.w,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

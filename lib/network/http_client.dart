@@ -3,6 +3,7 @@ import 'api_exception.dart';
 import 'api_response.dart';
 import 'http_config.dart';
 import 'json_converter_registry.dart';
+import '../dialog/loading_manager.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'interceptors/log_interceptor.dart' as custom;
 
@@ -72,7 +73,13 @@ class HttpClient {
     T Function(dynamic json)? fromJsonT,
     void Function(T? data)? onSuccess,
     void Function(ApiException exception)? onError,
+    bool showLoading = false,
   }) async {
+    // 显示加载弹窗
+    if (showLoading) {
+      LoadingManager.instance.show();
+    }
+
     try {
       final response = await _dio.request(
         path,
@@ -88,6 +95,7 @@ class HttpClient {
 
       // 如果响应数据是 Map，尝试解析为 ApiResponse
       if (response.data is Map<String, dynamic>) {
+        print("data: Map");
         final converter =
             fromJsonT ?? JsonConverterRegistry().getConverter<T>();
         final apiResponse = ApiResponse<T>.fromJson(
@@ -108,6 +116,7 @@ class HttpClient {
         }
 
         if (onSuccess != null) {
+          print("data: ${apiResponse.data},${apiResponse.code}");
           onSuccess(apiResponse.data);
         }
         return apiResponse.data;
@@ -148,6 +157,11 @@ class HttpClient {
         onError(exception);
       }
       return null;
+    } finally {
+      // 关闭加载弹窗
+      if (showLoading) {
+        LoadingManager.instance.dismiss();
+      }
     }
   }
 
@@ -160,6 +174,7 @@ class HttpClient {
     T Function(dynamic json)? fromJsonT,
     void Function(T? data)? onSuccess,
     void Function(ApiException exception)? onError,
+    bool showLoading = false,
   }) {
     return _request<T>(
       path,
@@ -170,6 +185,7 @@ class HttpClient {
       fromJsonT: fromJsonT,
       onSuccess: onSuccess,
       onError: onError,
+      showLoading: showLoading,
     );
   }
 
@@ -183,6 +199,7 @@ class HttpClient {
     T Function(dynamic json)? fromJsonT,
     void Function(T? data)? onSuccess,
     void Function(ApiException exception)? onError,
+    bool showLoading = false,
   }) {
     return _request<T>(
       path,
@@ -194,6 +211,7 @@ class HttpClient {
       fromJsonT: fromJsonT,
       onSuccess: onSuccess,
       onError: onError,
+      showLoading: showLoading,
     );
   }
 
@@ -207,6 +225,7 @@ class HttpClient {
     T Function(dynamic json)? fromJsonT,
     void Function(T? data)? onSuccess,
     void Function(ApiException exception)? onError,
+    bool showLoading = false,
   }) {
     return _request<T>(
       path,
@@ -218,6 +237,7 @@ class HttpClient {
       fromJsonT: fromJsonT,
       onSuccess: onSuccess,
       onError: onError,
+      showLoading: showLoading,
     );
   }
 
@@ -231,6 +251,7 @@ class HttpClient {
     T Function(dynamic json)? fromJsonT,
     void Function(T? data)? onSuccess,
     void Function(ApiException exception)? onError,
+    bool showLoading = false,
   }) {
     return _request<T>(
       path,
@@ -242,6 +263,7 @@ class HttpClient {
       fromJsonT: fromJsonT,
       onSuccess: onSuccess,
       onError: onError,
+      showLoading: showLoading,
     );
   }
 
@@ -255,6 +277,7 @@ class HttpClient {
     T Function(dynamic json)? fromJsonT,
     void Function(T? data)? onSuccess,
     void Function(ApiException exception)? onError,
+    bool showLoading = false,
   }) {
     return _request<T>(
       path,
@@ -266,6 +289,7 @@ class HttpClient {
       fromJsonT: fromJsonT,
       onSuccess: onSuccess,
       onError: onError,
+      showLoading: showLoading,
     );
   }
 

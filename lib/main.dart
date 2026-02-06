@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_boost/flutter_boost.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test_demo/CustomFlutterBinding.dart';
 import 'package:flutter_test_demo/app/constants/app_constants.dart';
@@ -38,18 +39,17 @@ class _NavigationAppState extends State<ShopApp> {
   /// 应用构建器
   Widget appBuilder(Widget home) {
     return ScreenUtilInit(
-        designSize: const Size(375, 817),
-        minTextAdapt: true,
-        splitScreenMode: true,
-        builder: (context, child) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            home: home,
-            builder: (_, __) {
-              return home;
-            },
-          );
-        });
+      designSize: const Size(375, 817),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: home,
+          builder: EasyLoading.init(), // 直接初始化 EasyLoading
+        );
+      },
+    );
   }
 
   /// 路由工厂
@@ -71,7 +71,7 @@ class _NavigationAppState extends State<ShopApp> {
     return FlutterBoostApp(
       routeFactory,
       appBuilder: appBuilder,
-      initialRoute: RoutePaths.splash.path, // 使用新的路由名称
+      initialRoute: RoutePaths.home.path, // 使用新的路由名称
     );
   }
 }

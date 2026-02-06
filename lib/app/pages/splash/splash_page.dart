@@ -2,10 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_test_demo/core/framework_initializer.dart';
 import 'package:flutter_test_demo/navigation/core/navigator_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter_test_demo/navigation/utils/route_result.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../navigation/core/route_paths.dart';
@@ -101,23 +99,12 @@ class _SplashPageState extends State<SplashPage> {
     SplashApi.checkAppUpdate(
       onSuccess: (updateInfo) {
         if (updateInfo != null && updateInfo.versionCode != null) {
-          // TODO: 获取当前应用版本号进行比较
-          // 这里暂时假设需要更新
-          final needUpdate = false; // updateInfo.versionCode! > currentVersionCode
-
-          if (needUpdate) {
-            // TODO: 显示更新弹窗
-            print('发现新版本: ${updateInfo.versionName}');
-            // 暂时不阻塞，继续倒计时
-            _startCountdown();
-          } else {
-            // 不需要更新，开始倒计时
-            _startCountdown();
-          }
-        } else {
-          // 检查更新失败，继续倒计时
-          _startCountdown();
+          // TODO: 获取当前应用版本号进行比较，显示更新弹窗
+          // final needUpdate = updateInfo.versionCode! > currentVersionCode
+          // if (needUpdate) { 显示更新弹窗 }
         }
+        // 开始倒计时
+        _startCountdown();
       },
       onError: (exception) {
         // 检查更新失败，继续倒计时

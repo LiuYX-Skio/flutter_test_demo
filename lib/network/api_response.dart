@@ -48,11 +48,13 @@ class ApiResponse<T> {
             convertedData = fromJsonT(data);
           } catch (e) {
             convertedData = null;
+            print("fromJsonT e: $e");
           }
         } else {
           try {
             convertedData = JsonConverterRegistry().convert<T>(data);
           } catch (e) {
+            print("innerJsonT e: $e");
             convertedData = null;
           }
         }

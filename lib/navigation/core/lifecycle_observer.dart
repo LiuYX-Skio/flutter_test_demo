@@ -170,18 +170,6 @@ class PageLifecycleManager {
     });
   }
 
-  /// 为页面添加生命周期观察者
-  void addPageObserver(PageLifecycleObserver observer, Route route, [String? routeName]) {
-    final pageObserver = PageLevelLifecycleObserver(observer, routeName);
-    PageVisibilityBinding.instance.addObserver(pageObserver, route);
-  }
-
-  /// 移除页面的生命周期观察者
-  void removePageObserver(PageLifecycleObserver observer) {
-    // 注意：Flutter Boost 的 PageVisibilityObserver 移除需要具体的实例
-    // 这里可能需要改进实现
-  }
-
   /// 获取所有全局观察者
   List<PageLifecycleObserver> get globalObservers =>
       _globalObservers.map((e) => e._observer).whereType<PageLifecycleObserver>().toList();
@@ -225,7 +213,7 @@ class SimpleGlobalLifecycleObserver implements PageLifecycleObserver {
   }
 }
 
-/// 页面生命周期Mixin - 简化页面级生命周期使用
+/// 页面生命周期Mixin
 /// 不实现 PageLifecycleObserver 接口，避免方法签名冲突
 mixin PageLifecycleMixin<T extends StatefulWidget> on State<T> {
   late PageLevelLifecycleObserver _observer;
@@ -233,7 +221,6 @@ mixin PageLifecycleMixin<T extends StatefulWidget> on State<T> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
     // 在 didChangeDependencies 中注册观察者
     final route = ModalRoute.of(context);
     if (route != null) {

@@ -72,6 +72,7 @@ class HomeViewModel extends ChangeNotifier {
           _errorMessage = null;
         }
         _isLoading = false;
+        print("getHomeData${_homeData?.banner?.length}");
         notifyListeners();
       },
       onError: (exception) {

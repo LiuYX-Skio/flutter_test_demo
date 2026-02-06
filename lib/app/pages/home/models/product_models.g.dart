@@ -8,16 +8,16 @@ part of 'product_models.dart';
 
 ProductEntity _$ProductEntityFromJson(Map<String, dynamic> json) =>
     ProductEntity(
-      id: (json['id'] as num?)?.toInt(),
+      id: AppDataUtils.toInt(json['id']),
       name: json['storeName'] as String?,
       imageUrl: json['image'] as String?,
-      price: ProductEntity._stringToDouble(json['price']),
-      originalPrice: ProductEntity._stringToDouble(json['otPrice']),
+      price: AppDataUtils.toDouble(json['price']),
+      originalPrice: AppDataUtils.toDouble(json['otPrice']),
       description: json['description'] as String?,
-      stock: (json['stock'] as num?)?.toInt(),
-      salesCount: (json['sales'] as num?)?.toInt(),
+      stock: AppDataUtils.toInt(json['stock']),
+      salesCount: AppDataUtils.toInt(json['sales']),
       tag: json['tag'] as String?,
-      categoryId: (json['categoryId'] as num?)?.toInt(),
+      categoryId: AppDataUtils.toInt(json['categoryId']),
     );
 
 Map<String, dynamic> _$ProductEntityToJson(ProductEntity instance) =>
@@ -39,10 +39,10 @@ ShopOutEntity _$ShopOutEntityFromJson(Map<String, dynamic> json) =>
       list: (json['list'] as List<dynamic>?)
           ?.map((e) => ProductEntity.fromJson(e as Map<String, dynamic>))
           .toList(),
-      limit: (json['limit'] as num?)?.toInt(),
-      page: (json['page'] as num?)?.toInt(),
-      total: (json['total'] as num?)?.toInt(),
-      totalPage: (json['totalPage'] as num?)?.toInt(),
+      limit: AppDataUtils.toInt(json['limit']),
+      page: AppDataUtils.toInt(json['page']),
+      total: AppDataUtils.toInt(json['total']),
+      totalPage: AppDataUtils.toInt(json['totalPage']),
     );
 
 Map<String, dynamic> _$ShopOutEntityToJson(ShopOutEntity instance) =>

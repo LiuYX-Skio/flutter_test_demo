@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../../../../navigation/utils/app_data_utils.dart';
 
 part 'product_models.g.dart';
 
@@ -7,6 +8,7 @@ part 'product_models.g.dart';
 @JsonSerializable()
 class ProductEntity {
   /// 商品ID
+  @JsonKey(fromJson: AppDataUtils.toInt)
   final int? id;
 
   /// 商品名称
@@ -18,27 +20,29 @@ class ProductEntity {
   final String? imageUrl;
 
   /// 商品价格
-  @JsonKey(fromJson: _stringToDouble)
+  @JsonKey(fromJson: AppDataUtils.toDouble)
   final double? price;
 
   /// 原价
-  @JsonKey(name: 'otPrice', fromJson: _stringToDouble)
+  @JsonKey(name: 'otPrice', fromJson: AppDataUtils.toDouble)
   final double? originalPrice;
 
   /// 商品描述
   final String? description;
 
   /// 库存数量
+  @JsonKey(fromJson: AppDataUtils.toInt)
   final int? stock;
 
   /// 销售数量
-  @JsonKey(name: 'sales')
+  @JsonKey(name: 'sales', fromJson: AppDataUtils.toInt)
   final int? salesCount;
 
   /// 商品标签
   final String? tag;
 
   /// 商品分类ID
+  @JsonKey(fromJson: AppDataUtils.toInt)
   final int? categoryId;
 
   ProductEntity({
@@ -58,15 +62,6 @@ class ProductEntity {
       _$ProductEntityFromJson(json);
 
   Map<String, dynamic> toJson() => _$ProductEntityToJson(this);
-
-  /// 将字符串或数字转换为 double
-  static double? _stringToDouble(dynamic value) {
-    if (value == null) return null;
-    if (value is double) return value;
-    if (value is int) return value.toDouble();
-    if (value is String) return double.tryParse(value);
-    return null;
-  }
 }
 
 /// 分页数据包装器
@@ -77,15 +72,19 @@ class ShopOutEntity {
   final List<ProductEntity>? list;
 
   /// 每页数量
+  @JsonKey(fromJson: AppDataUtils.toInt)
   final int? limit;
 
   /// 当前页码
+  @JsonKey(fromJson: AppDataUtils.toInt)
   final int? page;
 
   /// 总数量
+  @JsonKey(fromJson: AppDataUtils.toInt)
   final int? total;
 
   /// 总页数
+  @JsonKey(fromJson: AppDataUtils.toInt)
   final int? totalPage;
 
   ShopOutEntity({

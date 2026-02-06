@@ -6,6 +6,7 @@ import 'route_definition.dart';
 import 'route_paths.dart';
 import '../config/route_config.dart';
 import '../../app/pages/home/home_providers.dart';
+import '../../app/pages/detail/shop_detail_page.dart';
 
 /// 路由注册器 - 统一管理所有路由注册
 class RouteRegistry {
@@ -122,7 +123,12 @@ class RouteRegistry {
       ),
       RoutePaths.product.detail.path: RouteDefinition(
         name: RoutePaths.product.detail.path,
-        builder: (context) => const _PlaceholderPage(title: '商品详情'),
+        builder: (context) {
+          // 从路由参数中获取商品ID
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          final productId = args?['id'] as int? ?? 0;
+          return ShopDetailPage(productId: productId);
+        },
       ),
       RoutePaths.product.search.path: RouteDefinition(
         name: RoutePaths.product.search.path,

@@ -21,15 +21,15 @@ class MenuGridWidget extends StatelessWidget {
     }
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+      padding: EdgeInsets.symmetric(horizontal: 11.w),
       child: GridView.builder(
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 4,
-          mainAxisSpacing: 16.h,
-          crossAxisSpacing: 16.w,
-          childAspectRatio: 1.0,
+          crossAxisCount: 5, // Android是5列
+          mainAxisSpacing: 0,
+          crossAxisSpacing: 0,
+          mainAxisExtent: 95.h,    // 固定高度，每个格子 90 像素
         ),
         itemCount: menus.length,
         itemBuilder: (context, index) {
@@ -44,11 +44,11 @@ class MenuGridWidget extends StatelessWidget {
                   height: 48.w,
                   decoration: BoxDecoration(
                     color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8.r),
+                    borderRadius: BorderRadius.circular(6.r),
                   ),
                   child: menu.iconUrl != null
                       ? ClipRRect(
-                          borderRadius: BorderRadius.circular(8.r),
+                          borderRadius: BorderRadius.circular(6.r),
                           child: CachedNetworkImage(
                             imageUrl: menu.iconUrl!,
                             fit: BoxFit.cover,
@@ -61,15 +61,16 @@ class MenuGridWidget extends StatelessWidget {
                         )
                       : const Icon(Icons.apps),
                 ),
-                SizedBox(height: 8.h),
+                SizedBox(height: 10.h),
                 Text(
                   menu.name ?? '',
                   style: TextStyle(
-                    fontSize: 12.sp,
-                    color: Colors.black87,
+                    fontSize: 13.sp,
+                    color: const Color(0xFF333333),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
                 ),
               ],
             ),
