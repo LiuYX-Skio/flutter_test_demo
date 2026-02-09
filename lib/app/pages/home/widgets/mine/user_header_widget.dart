@@ -9,10 +9,10 @@ class UserHeaderWidget extends StatelessWidget {
   final VoidCallback? onTap;
 
   const UserHeaderWidget({
-    Key? key,
+    super.key,
     this.userInfo,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -7,10 +7,10 @@ class EmptyWidget extends StatelessWidget {
   final IconData? icon;
 
   const EmptyWidget({
-    Key? key,
+    super.key,
     this.message,
     this.icon,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

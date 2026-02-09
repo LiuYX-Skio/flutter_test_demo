@@ -1,5 +1,7 @@
-import '../../network/network.dart';
-import '../models/splash_models.dart';
+
+import 'package:flutter_test_demo/app/models/splash_models.dart';
+import 'package:flutter_test_demo/network/api_exception.dart';
+import 'package:flutter_test_demo/network/http_client.dart';
 
 /// 启动页 API 接口
 class SplashApi {

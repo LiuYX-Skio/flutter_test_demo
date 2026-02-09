@@ -1,3 +1,5 @@
+import 'package:flutter_test_demo/app/pages/login/models/login_models.dart';
+
 import '../app/models/splash_models.dart' as splash;
 import '../app/pages/home/models/home_models.dart';
 import '../app/pages/home/models/product_models.dart';
@@ -25,18 +27,6 @@ class NetworkInitializer {
       (json) => splash.IpAddressEntity.fromJson(json as Map<String, dynamic>),
     );
 
-    // 注册首页相关实体
-    registry.register<HomeTitleDataEntity>(
-      (json) {
-        print('HomeTitleDataEntity converter - json type: ${json.runtimeType}');
-        if (json is! Map<String, dynamic>) {
-          print('ERROR: Expected Map but got ${json.runtimeType}');
-          print('JSON content: $json');
-          throw ArgumentError('Expected Map<String, dynamic> but got ${json.runtimeType}');
-        }
-        return HomeTitleDataEntity.fromJson(json);
-      },
-    );
 
     registry.register<BannerEntity>(
       (json) => BannerEntity.fromJson(json as Map<String, dynamic>),
@@ -79,6 +69,12 @@ class NetworkInitializer {
       (json) => ShopDetailEntity.fromJson(json as Map<String, dynamic>),
     );
 
+    // 登录
+    registry.register<UserInfo>(
+          (json) => UserInfo.fromJson(json as Map<String, dynamic>),
+    );
+
+
     registry.register<ShopInfoEntity>(
       (json) => ShopInfoEntity.fromJson(json as Map<String, dynamic>),
     );
@@ -114,9 +110,6 @@ class NetworkInitializer {
     // 注册基本类型（String 类型特殊处理）
     registry.register<String>((json) => json as String);
 
-    // ========== 注册 List 元素转换器 ==========
-    // 用于处理 List<Entity> 类型的响应数据
-
     // 注册启动页相关实体的 List 转换器
     registry.registerListItem<splash.AppUpdateEntity>(
       (json) => splash.AppUpdateEntity.fromJson(json as Map<String, dynamic>),
@@ -130,9 +123,11 @@ class NetworkInitializer {
       (json) => splash.IpAddressEntity.fromJson(json as Map<String, dynamic>),
     );
 
-    // 注册首页相关实体的 List 转换器
-    registry.registerListItem<HomeTitleDataEntity>(
-      (json) => HomeTitleDataEntity.fromJson(json as Map<String, dynamic>),
+    // 注册首页相关实体
+    registry.register<HomeTitleDataEntity>(
+          (json) {
+        return HomeTitleDataEntity.fromJson(json);
+      },
     );
 
     registry.registerListItem<BannerEntity>(
@@ -164,11 +159,6 @@ class NetworkInitializer {
     // 注册地址实体的 List 转换器
     registry.registerListItem<AddressEntity>(
       (json) => AddressEntity.fromJson(json as Map<String, dynamic>),
-    );
-
-    // 注册商品详情相关实体的 List 转换器
-    registry.registerListItem<ShopDetailEntity>(
-      (json) => ShopDetailEntity.fromJson(json as Map<String, dynamic>),
     );
 
     registry.registerListItem<ShopInfoEntity>(

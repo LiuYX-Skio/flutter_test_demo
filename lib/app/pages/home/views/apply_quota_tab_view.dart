@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_test_demo/app/widgets/error_widget.dart';
+import 'package:flutter_test_demo/app/widgets/loading_widget.dart';
+import 'package:flutter_test_demo/navigation/core/navigator_service.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../navigation/core/route_paths.dart';
 import '../viewmodels/apply_quota_viewmodel.dart';
-import '../widgets/common/loading_widget.dart';
-import '../widgets/common/error_widget.dart';
 
 /// 月付申请Tab视图
 class ApplyQuotaTabView extends StatefulWidget {
@@ -35,106 +37,254 @@ class _ApplyQuotaTabViewState extends State<ApplyQuotaTabView>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('月付申请'),
-        centerTitle: true,
-      ),
-      body: Consumer<ApplyQuotaViewModel>(
-        builder: (context, viewModel, child) {
-          // 加载中
-          if (viewModel.isLoading && viewModel.userCreditDetail == null) {
-            return const LoadingWidget(message: '加载中...');
-          }
+    return Consumer<ApplyQuotaViewModel>(
+      builder: (context, viewModel, child) {
+        // 加载中
+        if (viewModel.isLoading && viewModel.userCreditDetail == null) {
+          return const LoadingWidget(message: '加载中...');
+        }
 
-          // 加载失败
-          if (viewModel.errorMessage != null &&
-              viewModel.userCreditDetail == null) {
-            return ErrorStateWidget(
-              message: viewModel.errorMessage,
-              onRetry: () => viewModel.refresh(),
-            );
-          }
+        // 加载失败
+        if (viewModel.errorMessage != null &&
+            viewModel.userCreditDetail == null) {
+          return ErrorStateWidget(
+            message: viewModel.errorMessage,
+            onRetry: () => viewModel.refresh(),
+          );
+        }
 
-          return SingleChildScrollView(
-            padding: EdgeInsets.all(16.w),
+        return Container(
+          color: const Color(0xFFF3F5F7), // color_F3F5F7
+          child: SingleChildScrollView(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 额度信息卡片
-                _buildCreditCard(viewModel),
+                // 顶部渐变背景区域 (作为Stack布局)
+                SizedBox(
+                  height: 320.h, // 稍微降低高度，避免视觉上过高
+                  child: _buildTopBackground(),
+                ),
 
-                SizedBox(height: 16.h),
+                // 功能介绍卡片区域
+                _buildFeatureCards(),
 
-                // 申请状态
-                _buildStatusCard(viewModel),
+                // 底部流程展示区域
+                _buildBottomProcess(),
 
-                SizedBox(height: 24.h),
+                // 底部按钮
+                _buildBottomButton(viewModel),
 
-                // 申请按钮
-                _buildApplyButton(viewModel),
+                // 底部安全区域
+                SizedBox(height: 50.h),
               ],
             ),
-          );
-        },
+          ),
+        );
+      },
+    );
+  }
+
+  /// 顶部渐变背景区域
+  Widget _buildTopBackground() {
+    return Stack(
+      children: [
+        // 渐变背景
+        Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                Color(0xFFF23C38), // color_F23C38
+                Color(0xFFFDCCC0), // color_FDCCC0
+              ],
+            ),
+          ),
+        ),
+
+        // 标题
+        Positioned(
+          left: 20.w,
+          top: 70.h,
+          child: Text(
+            '宝鱼月付',
+            style: TextStyle(
+              fontSize: 18.sp,
+              color: const Color(0xFF1A1A1A), // color_1A1A1A
+            ),
+          ),
+        ),
+
+        // 副标题
+        Positioned(
+          left: 20.w,
+          top: 110.h,
+          child: Text(
+            '先享后付\n收货满意才付款',
+            style: TextStyle(
+              fontSize: 23.sp,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF1A1A1A), // color_1A1A1A
+              height: 1.2,
+            ),
+          ),
+        ),
+
+        // 右上角图标
+        Positioned(
+          right: 7.w,
+          top: 65.h,
+          child: Image.asset(
+            'assets/images/icon_packet.webp',
+            width: 127.w,
+            height: 119.h,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// 功能介绍卡片区域
+  Widget _buildFeatureCards() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 15.w, vertical: 20.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
+      child: Column(
+        children: [
+          // 轻松购物优惠多
+          _buildFeatureItemFullWidth(
+            'assets/images/icon_t.webp',
+            '轻松购物优惠多',
+            '海量立减优惠，新人专享',
+          ),
+
+          // 退款无忧有保障
+          _buildFeatureItemFullWidth(
+            'assets/images/icon_m_kf.webp',
+            '退款无忧有保障',
+            '先收货再付款，下单无压力',
+          ),
+
+          // 退货运费险
+          _buildFeatureItemFullWidth(
+            'assets/images/icon_yj.webp',
+            '退货运费险',
+            '可免退货运费',
+          ),
+
+          // 专属客服微信服务
+          _buildFeatureItemFullWidth(
+            'assets/images/icon_j.webp',
+            '专属客服微信服务',
+            '专属客服一对一',
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCreditCard(ApplyQuotaViewModel viewModel) {
-    final myCreditLimit = viewModel.myCreditLimit;
-
+  /// 全宽度功能项 (按照Android布局，每个功能项占满宽度)
+  Widget _buildFeatureItemFullWidth(String iconPath, String title, String desc) {
     return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
-          ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(12.r),
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).primaryColor.withOpacity(0.3),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+      padding: EdgeInsets.symmetric(horizontal: 25.w, vertical: 25.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Image.asset(
+            iconPath,
+            width: 50.w,
+            height: 50.h,
+          ),
+          SizedBox(width: 19.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: const Color(0xFF1A1A1A), // color_1A1A1A
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  desc,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: const Color(0xFF999999), // color_999999
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
+    );
+  }
+
+  /// 底部流程展示区域
+  Widget _buildBottomProcess() {
+    return Container(
+      margin: EdgeInsets.only(
+        left: 15.w,
+        right: 15.w,
+        top: 12.h, // 与功能卡片区域的间距12dp
+      ),
+      padding: EdgeInsets.only(
+        top: 12.h,
+        bottom: 30.h,
+        left: 0,
+        right: 0,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.r),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '我的额度',
-            style: TextStyle(
-              fontSize: 16.sp,
-              color: Colors.white.withOpacity(0.9),
+          // 标题部分
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Image.asset(
+                  'assets/images/icon_month_line.webp',
+                  width: 40.w,
+                  height: 40.h,
+                ),
+                SizedBox(width: 20.w),
+                Text(
+                  '哪里可以用',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: const Color(0xFF323233), // color_323233
+                  ),
+                ),
+                SizedBox(width: 20.w),
+                Transform.rotate(
+                  angle: 3.14159, // 180度
+                  child: Image.asset(
+                    'assets/images/icon_month_line.webp',
+                    width: 40.w,
+                    height: 40.h,
+                  ),
+                ),
+              ],
             ),
           ),
-          SizedBox(height: 12.h),
-          Text(
-            '¥${myCreditLimit?.totalLimit?.toStringAsFixed(2) ?? '0.00'}',
-            style: TextStyle(
-              fontSize: 36.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          SizedBox(height: 16.h),
+
+          SizedBox(height: 7.h),
+
+          // 三个功能项
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildCreditItem(
-                '可用额度',
-                '¥${myCreditLimit?.availableLimit?.toStringAsFixed(2) ?? '0.00'}',
-              ),
-              _buildCreditItem(
-                '已使用',
-                '¥${myCreditLimit?.usedLimit?.toStringAsFixed(2) ?? '0.00'}',
-              ),
+              _buildProcessItem('商城购物', 'assets/images/icon_zb.webp'),
+              _buildProcessItem('商城回收', 'assets/images/icon_ms.webp'),
+              _buildProcessItem('话费充值', 'assets/images/icon_hf.webp'),
             ],
           ),
         ],
@@ -142,141 +292,96 @@ class _ApplyQuotaTabViewState extends State<ApplyQuotaTabView>
     );
   }
 
-  Widget _buildCreditItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.sp,
-            color: Colors.white.withOpacity(0.8),
+  /// 流程项
+  Widget _buildProcessItem(String title, String iconPath) {
+    return Expanded(
+      child: Column(
+        children: [
+          Image.asset(
+            iconPath,
+            width: 40.w,
+            height: 40.h,
           ),
-        ),
-        SizedBox(height: 4.h),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.w500,
-            color: Colors.white,
+          SizedBox(height: 8.h),
+          Text(
+            title,
+            style: TextStyle(
+              color: const Color(0xFF1A1A1A), // color_1A1A1A
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildStatusCard(ApplyQuotaViewModel viewModel) {
-    final status = viewModel.userCreditDetail?.status ?? 0;
-    String statusText;
-    Color statusColor;
-
-    switch (status) {
-      case 0:
-        statusText = '未申请';
-        statusColor = Colors.grey;
-        break;
-      case 1:
-        statusText = '审核中';
-        statusColor = Colors.orange;
-        break;
-      case 2:
-        statusText = '已通过';
-        statusColor = Colors.green;
-        break;
-      case 3:
-        statusText = '已拒绝';
-        statusColor = Colors.red;
-        break;
-      default:
-        statusText = '未知状态';
-        statusColor = Colors.grey;
-    }
+  /// 底部按钮 (模拟UserButtonView)
+  Widget _buildBottomButton(ApplyQuotaViewModel viewModel) {
+    // 根据状态确定是否为选中状态
+    final isSelected = viewModel.userCreditDetail?.status != 1; // 审核中状态为未选中
 
     return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+      margin: EdgeInsets.only(bottom: 30.h), // 底部间距30dp
+      padding: EdgeInsets.symmetric(horizontal: 12.w), // 水平间距12dp
+      child: SizedBox(
+        width: double.infinity,
+        height: 49.h,
+        child: Container(
+          decoration: BoxDecoration(
+            color: isSelected
+                ? const Color(0xFFFF3530) // color_FF3530 - 选中状态
+                : const Color(0x4DFF3530), // color_4dFF3530 - 未选中状态
+            borderRadius: BorderRadius.circular(29.w), // 圆角29dp
           ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.info_outline,
-            color: statusColor,
-            size: 24.w,
-          ),
-          SizedBox(width: 12.w),
-          Text(
-            '申请状态：',
-            style: TextStyle(
-              fontSize: 14.sp,
-              color: Colors.black87,
+          child: TextButton(
+            onPressed: isSelected ? () => _onApplyButtonPressed(viewModel) : null,
+            style: TextButton.styleFrom(
+              foregroundColor: Colors.white,
+              textStyle: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w500,
+              ),
             ),
+            child: Text(_getButtonText(viewModel)),
           ),
-          Text(
-            statusText,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.bold,
-              color: statusColor,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildApplyButton(ApplyQuotaViewModel viewModel) {
+  /// 获取按钮文本 (根据Android布局，固定显示"立即开通")
+  String _getButtonText(ApplyQuotaViewModel viewModel) {
+    return '立即开通';
+  }
+
+  /// 按钮点击处理
+  void _onApplyButtonPressed(ApplyQuotaViewModel viewModel) {
     final status = viewModel.userCreditDetail?.status ?? 0;
-    final isAuthenticated = viewModel.isAuthenticated;
 
-    String buttonText;
-    VoidCallback? onPressed;
-
-    if (status == 0) {
-      buttonText = '立即申请';
-      onPressed = () {
-        print('跳转到申请页面');
-      };
-    } else if (status == 1) {
-      buttonText = '审核中';
-      onPressed = null;
-    } else if (status == 2) {
-      buttonText = '已通过';
-      onPressed = null;
-    } else {
-      buttonText = '重新申请';
-      onPressed = () {
-        print('跳转到申请页面');
-      };
+    // 审核中和已通过状态不响应点击
+    if (status == 1 || status == 2) {
+      return;
     }
 
-    return SizedBox(
-      width: double.infinity,
-      height: 48.h,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-        ),
-        child: Text(
-          buttonText,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
+    // 根据认证状态跳转不同页面
+    if (viewModel.isAuthenticated) {
+      // 已认证，跳转到补充信息页面
+      _navigateToSupplementMessage();
+    } else {
+      // 未认证，跳转到认证信息页面
+      _navigateToAuthMessage();
+    }
+  }
+
+  /// 跳转到补充信息页面
+  void _navigateToSupplementMessage() {
+    context.nav.push(RoutePaths.other.supplementMessage);
+  }
+
+  /// 跳转到认证信息页面
+  void _navigateToAuthMessage() {
+    context.nav.push(
+      RoutePaths.other.authMessage,
+      arguments: {'hasApply': true},
     );
   }
 }

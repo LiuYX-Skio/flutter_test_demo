@@ -2,15 +2,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_test_demo/app/pages/splash/api/splash_api.dart';
+import 'package:flutter_test_demo/app/pages/splash/widgets/splash_protocol_dialog.dart';
 import 'package:flutter_test_demo/navigation/core/navigator_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../navigation/core/route_paths.dart';
-import '../../api/splash_api.dart';
 import '../../constants/app_colors.dart';
 import '../../constants/app_constants.dart';
-import '../../widgets/splash_protocol_dialog.dart';
 
 
 /// 启动页

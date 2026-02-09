@@ -84,7 +84,7 @@ class LoadingManager {
   /// 显示警告提示
   /// [message] 提示文本
   /// [duration] 显示时长，默认2秒
-  Future<void> showWarning(
+  Future<void> showToast(
     String message, {
     Duration duration = const Duration(seconds: 2),
   }) async {

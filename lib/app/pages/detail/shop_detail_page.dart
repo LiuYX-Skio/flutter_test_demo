@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_test_demo/app/dialog/loading_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_html/flutter_html.dart';
 
-import '../../../dialog/loading_manager.dart';
 import 'viewmodels/shop_detail_viewmodel.dart';
 import 'widgets/shop_detail_bottom_widget.dart';
 import 'widgets/shop_detail_message_widget.dart';

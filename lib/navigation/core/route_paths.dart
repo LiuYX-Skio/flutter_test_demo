@@ -61,7 +61,7 @@ class RoutePath {
 class AuthRoutes {
   const AuthRoutes._();
 
-  final RoutePath login = const RoutePath('auth/login');
+  final RoutePath login = const RoutePath('login'); // 对应Android的UNION_LOGIN_ACTIVITY
   final RoutePath register = const RoutePath('auth/register');
   final RoutePath forgotPassword = const RoutePath('auth/forgot_password');
   final RoutePath verifyCode = const RoutePath('auth/verify_code');
@@ -116,8 +116,13 @@ class OtherRoutes {
   final RoutePath confirm = const RoutePath('confirm');
   final RoutePath error = const RoutePath('error');
 
+  // 月付相关路由
+  final RoutePath supplementMessage = const RoutePath('home/supplement_message');
+  final RoutePath authMessage = const RoutePath('home/auth_message');
+
   List<RoutePath> get all => [
     notificationList, notificationDetail, feedback, about,
-    webview, share, imagePreview, loading, confirm, error
+    webview, share, imagePreview, loading, confirm, error,
+    supplementMessage, authMessage
   ];
 }

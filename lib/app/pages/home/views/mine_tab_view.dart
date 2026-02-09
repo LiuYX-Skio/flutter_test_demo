@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_test_demo/app/widgets/refresh_list_widget.dart';
+import 'package:flutter_test_demo/navigation/core/navigator_service.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../../../navigation/core/route_paths.dart';
 import '../viewmodels/mine_viewmodel.dart';
-import '../widgets/common/loading_widget.dart';
-import '../widgets/common/error_widget.dart';
-import '../widgets/common/refresh_list_widget.dart';
-import '../widgets/mine/user_header_widget.dart';
-import '../widgets/mine/feature_grid_widget.dart';
-import '../widgets/mine/mine_product_list.dart';
+import '../widgets/mine/user_order_view.dart';
+import '../widgets/mine/shop_recommend_view.dart';
 
-/// 我的Tab视图
+/// 我的Tab视图 - 完全按照Android MineFragment实现
 class MineTabView extends StatefulWidget {
   const MineTabView({Key? key}) : super(key: key);
 
@@ -28,10 +27,11 @@ class _MineTabViewState extends State<MineTabView>
     super.initState();
     _refreshController = RefreshController(initialRefresh: false);
 
-    // 延迟初始化
+    // 延迟初始化 - 对应Android的initFragment
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _viewModel = Provider.of<MineViewModel>(context, listen: false);
-      _viewModel.refresh();
+      // 初始化商品列表 - 对应Android的recommendList(true)
+      _viewModel.recommendList(true, 1, 20);
     });
   }
 
@@ -48,117 +48,314 @@ class _MineTabViewState extends State<MineTabView>
   Widget build(BuildContext context) {
     super.build(context);
 
-    return Scaffold(
-      body: Consumer<MineViewModel>(
-        builder: (context, viewModel, child) {
-          // 首次加载
-          if (viewModel.isLoading && viewModel.userInfo == null) {
-            return const LoadingWidget(message: '加载中...');
-          }
-
-          // 加载失败
-          if (viewModel.errorMessage != null && viewModel.userInfo == null) {
-            return ErrorStateWidget(
-              message: viewModel.errorMessage,
-              onRetry: () => viewModel.refresh(),
-            );
-          }
-
-          return RefreshListWidget(
-            controller: _refreshController,
-            onRefresh: _onRefresh,
-            onLoading: _onLoading,
-            enablePullUp: viewModel.hasMore,
+    return Consumer<MineViewModel>(
+      builder: (context, viewModel, child) {
+        return RefreshListWidget(
+          controller: _refreshController,
+          enablePullDown: false, // Android中srlEnableRefresh="false"
+          enablePullUp: true,
+          onLoading: _onLoading,
+          child: Container(
+            color: const Color(0xFFF7F9FC), // color_F7F9FC
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  // 用户信息头部
-                  UserHeaderWidget(
-                    userInfo: viewModel.userInfo,
-                    onTap: () {
-                      print('点击用户信息');
-                    },
-                  ),
+                  // 顶部用户信息区域
+                  _buildTopUserInfo(viewModel),
 
-                  SizedBox(height: 16.h),
+                  // 月付视图
+                  if (viewModel.isMonthPayOpen) _buildMonthPayView(viewModel),
 
-                  // 功能入口网格
-                  FeatureGridWidget(
-                    features: _buildFeatures(),
-                  ),
+                  // 回收模块
+                  if (_shouldShowRecycleModule(viewModel)) _buildRecycleModule(),
 
-                  SizedBox(height: 16.h),
-
-                  // 推荐商品列表
-                  MineProductList(
-                    products: viewModel.productList,
-                    onTap: (product) {
-                      print('点击推荐商品: ${product.name}');
-                    },
-                  ),
-
-                  SizedBox(height: 16.h),
+                  // 商品推荐列表
+                  _buildProductRecommendList(viewModel),
                 ],
               ),
             ),
-          );
-        },
+          ),
+        );
+      },
+    );
+  }
+
+  /// 顶部用户信息区域 (RelativeLayout, 高度280dp)
+  Widget _buildTopUserInfo(MineViewModel viewModel) {
+    return Container(
+      height: 280.h,
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/images/mine_top.png'),
+          fit: BoxFit.cover,
+        ),
+      ),
+      padding: EdgeInsets.only(
+        left: 12.w,
+        top: 58.h,
+      ),
+      child: Column(
+        children: [
+          // 用户头像和信息行
+          Row(
+            children: [
+              // 头像
+              GestureDetector(
+                onTap: () => _onAvatarTap(viewModel),
+                child: Container(
+                  width: 60.w,
+                  height: 60.w,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(6.w),
+                    image: DecorationImage(
+                      image: viewModel.userAvatar != null
+                          ? NetworkImage(viewModel.userAvatar!)
+                          : const AssetImage('assets/images/icon_default.png') as ImageProvider,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(width: 12.w),
+
+              // 用户信息
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => _onUserInfoTap(viewModel),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        viewModel.userName,
+                        style: TextStyle(
+                          fontSize: 17.sp,
+                          fontWeight: FontWeight.bold,
+                          color: const Color(0xFF1A1A1A), // color_1A1A1A
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 8.h),
+                      Text(
+                        viewModel.userPhone,
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: const Color(0xFF333333), // color_333333
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // 右侧功能按钮
+              Row(
+                children: [
+                  // 购物车
+                  _buildTopIconButton(
+                    'assets/images/icon_gwc.png',
+                    '购物车',
+                    () => _onShopCarTap(viewModel),
+                    marginEnd: 15.w,
+                  ),
+
+                  // 设置
+                  _buildTopIconButton(
+                    'assets/images/icon_sz.png',
+                    '设置',
+                    () => _onSettingTap(),
+                    marginEnd: 15.w,
+                  ),
+
+                  // 客服
+                  _buildTopIconButton(
+                    'assets/images/icon_kf.png',
+                    '客服',
+                    () => _onServiceTap(viewModel),
+                    marginEnd: 18.w,
+                  ),
+
+                  // 钱包 (根据条件显示)
+                  if (_shouldShowWallet()) _buildTopIconButton(
+                    'assets/images/mine_wallet.webp',
+                    '钱包',
+                    () => _onWalletTap(viewModel),
+                    marginEnd: 18.w,
+                  ),
+                ],
+              ),
+            ],
+          ),
+
+          SizedBox(height: 20.h),
+
+          // 订单视图 (UserOrderView)
+          _buildUserOrderView(),
+        ],
       ),
     );
   }
 
-  List<FeatureItem> _buildFeatures() {
-    return [
-      FeatureItem(
-        title: '我的订单',
-        icon: Icons.shopping_bag_outlined,
-        onTap: () => print('我的订单'),
+  /// 顶部图标按钮
+  Widget _buildTopIconButton(String iconPath, String title, VoidCallback onTap, {required double marginEnd}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: EdgeInsets.only(left: marginEnd.w),
+        child: Column(
+          children: [
+            Image.asset(
+              iconPath,
+              width: 22.w,
+              height: 22.w,
+              fit: BoxFit.cover,
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 10.sp,
+                color: const Color(0xFF333333), // color_333333
+              ),
+            ),
+          ],
+        ),
       ),
-      FeatureItem(
-        title: '我的收藏',
-        icon: Icons.favorite_border,
-        onTap: () => print('我的收藏'),
-      ),
-      FeatureItem(
-        title: '收货地址',
-        icon: Icons.location_on_outlined,
-        onTap: () => print('收货地址'),
-      ),
-      FeatureItem(
-        title: '客服中心',
-        icon: Icons.headset_mic_outlined,
-        onTap: () => print('客服中心'),
-      ),
-      FeatureItem(
-        title: '优惠券',
-        icon: Icons.card_giftcard_outlined,
-        onTap: () => print('优惠券'),
-      ),
-      FeatureItem(
-        title: '积分商城',
-        icon: Icons.stars_outlined,
-        onTap: () => print('积分商城'),
-      ),
-      FeatureItem(
-        title: '设置',
-        icon: Icons.settings_outlined,
-        onTap: () => print('设置'),
-      ),
-      FeatureItem(
-        title: '关于',
-        icon: Icons.info_outline,
-        onTap: () => print('关于'),
-      ),
-    ];
+    );
   }
 
-  void _onRefresh() async {
-    await _viewModel.refresh();
-    _refreshController.refreshCompleted();
+  /// 用户订单视图 (UserOrderView)
+  Widget _buildUserOrderView() {
+    return Container(
+      margin: EdgeInsets.only(right: 12.w),
+      child: const UserOrderView(),
+    );
+  }
+
+  /// 月付视图 (UserMonthView)
+  Widget _buildMonthPayView(MineViewModel viewModel) {
+    return Container(
+      margin: EdgeInsets.only(
+        left: 12.w,
+        right: 12.w,
+        top: 10.h,
+      ),
+      height: 120.h, // 根据Android布局估算高度
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: const Center(
+        child: Text('月付视图 - 待实现'),
+      ),
+    );
+  }
+
+  /// 回收模块
+  Widget _buildRecycleModule() {
+    return Container(
+      margin: EdgeInsets.only(
+        left: 12.w,
+        right: 12.w,
+        top: 10.h,
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: 5.w,
+        vertical: 8.h,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(6.r),
+      ),
+      child: GestureDetector(
+        onTap: _onRecycleTap,
+        child: Image.asset(
+          'assets/images/sphss.png',
+          height: 60.h,
+          fit: BoxFit.fitWidth,
+        ),
+      ),
+    );
+  }
+
+  /// 商品推荐列表 (ShopRecommendView)
+  Widget _buildProductRecommendList(MineViewModel viewModel) {
+    return Container(
+      margin: EdgeInsets.only(top: 20.h),
+      child: ShopRecommendView(products: viewModel.productList),
+    );
+  }
+
+  /// 判断是否显示回收模块
+  bool _shouldShowRecycleModule(MineViewModel viewModel) {
+    // 根据Android逻辑：测试账号不显示，有月付开通时显示
+    return !viewModel.isTestAccount && viewModel.isMonthPayOpen;
+  }
+
+  /// 判断是否显示钱包按钮
+  bool _shouldShowWallet() {
+    // Android中钱包默认gone，需要根据条件控制
+    return false; // 暂时隐藏，待业务逻辑完善
+  }
+
+  /// 事件处理方法
+  void _onAvatarTap(MineViewModel viewModel) {
+    if (!viewModel.isLogin) {
+      context.nav.push(RoutePaths.auth.login);
+    } else {
+      context.nav.push(RoutePaths.user.profile);
+    }
+  }
+
+  void _onUserInfoTap(MineViewModel viewModel) {
+    if (!viewModel.isLogin) {
+      context.nav.push(RoutePaths.auth.login);
+    } else {
+      context.nav.push(RoutePaths.user.profile);
+    }
+  }
+
+  void _onShopCarTap(MineViewModel viewModel) {
+    if (viewModel.isLogin) {
+      context.nav.push(RoutePaths.product.cart);
+    } else {
+      context.nav.push(RoutePaths.auth.login);
+    }
+  }
+
+  void _onSettingTap() {
+    context.nav.push(RoutePaths.user.settings);
+  }
+
+  void _onServiceTap(MineViewModel viewModel) {
+    if (viewModel.isLogin) {
+      // 客服页面
+      print('跳转到客服页面');
+    } else {
+      context.nav.push(RoutePaths.auth.login);
+    }
+  }
+
+  void _onWalletTap(MineViewModel viewModel) {
+    if (viewModel.isLogin) {
+      // 钱包页面
+      print('跳转到钱包页面');
+    } else {
+      context.nav.push(RoutePaths.auth.login);
+    }
+  }
+
+  void _onRecycleTap() {
+    // 回收页面
+    context.nav.push(RoutePaths.other.supplementMessage); // 暂时用补充信息页面代替
   }
 
   void _onLoading() async {
-    await _viewModel.loadMore();
+    // 对应Android的recommendList() - 加载更多
+    final nextPage = _viewModel.currentPage + 1;
+    await _viewModel.recommendList(false, nextPage, 20);
+
     if (_viewModel.hasMore) {
       _refreshController.loadComplete();
     } else {

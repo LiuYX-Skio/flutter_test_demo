@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutter_test_demo/app/provider/user_provider.dart';
+import 'package:flutter_test_demo/app/utils/device_utils.dart';
 
 import '../network/network.dart';
 import '../navigation/navigation_initializer.dart';
@@ -104,6 +106,7 @@ class FrameworkInitializer {
       initNavigation();
     }
     initEasyDialog();
+    initDeviceInfo();
   }
 
 
@@ -122,6 +125,11 @@ class FrameworkInitializer {
       ..maskColor = Colors.blue.withOpacity(0.5)
       ..userInteractions = true
       ..dismissOnTap = false;
+  }
+
+  static void initDeviceInfo() async {
+    await DeviceUtils.getOrCreateDeviceModel();
+    UserProvider.updateUserInfo();
   }
 
   /// 初始化网络框架

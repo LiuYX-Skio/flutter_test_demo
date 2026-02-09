@@ -40,6 +40,7 @@ class ApiResponse<T> {
           convertedData = data as T?;
         } catch (e) {
           convertedData = null;
+          print("convertedData e: $e");
         }
       } else {
         // data 是复杂类型（Map 或 List），使用转换器

@@ -53,7 +53,10 @@ class JsonConverterRegistry {
 
   /// 转换 JSON 为指定类型
   T? convert<T>(dynamic json) {
-    if (json == null) return null;
+    if (json == null) {
+      print("no json");
+      return null;
+    };
 
     // 处理基本类型
     if (T == String || T == int || T == double || T == bool) {
@@ -77,6 +80,7 @@ class JsonConverterRegistry {
 
     // 处理 Map 类型
     if (T.toString().startsWith('Map<')) {
+      print("json map");
       return json as T;
     }
 
@@ -85,6 +89,8 @@ class JsonConverterRegistry {
     if (converter != null) {
       return converter(json);
     }
+
+    print("no converter");
 
     // 如果没有注册转换器，返回 null
     return null;

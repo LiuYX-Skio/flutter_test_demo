@@ -9,10 +9,10 @@ class MineProductList extends StatelessWidget {
   final Function(ProductEntity)? onTap;
 
   const MineProductList({
-    Key? key,
+    super.key,
     required this.products,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

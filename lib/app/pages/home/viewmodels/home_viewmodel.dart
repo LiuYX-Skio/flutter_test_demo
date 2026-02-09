@@ -49,10 +49,10 @@ class HomeViewModel extends ChangeNotifier {
     if (_isLoadingMore || !_hasMore) return;
 
     _isLoadingMore = true;
-    notifyListeners();
 
     try {
       final nextPage = _currentPage + 1;
+      print("加载更多商品$_currentPage");
       await fetchProductList(nextPage);
     } finally {
       _isLoadingMore = false;
@@ -63,7 +63,6 @@ class HomeViewModel extends ChangeNotifier {
   /// 获取首页顶部数据
   Future<void> fetchHomeData() async {
     _isLoading = true;
-    notifyListeners();
 
     await HomeApi.getHomeData(
       onSuccess: (result) {
@@ -100,6 +99,7 @@ class HomeViewModel extends ChangeNotifier {
                      (result.totalPage == null || page < result.totalPage!);
           _errorMessage = null;
         } else {
+          print("获取商品列表成功 No data");
           _hasMore = false;
         }
         notifyListeners();

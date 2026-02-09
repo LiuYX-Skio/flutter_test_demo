@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_test_demo/app/pages/home/home_page.dart';
 import 'package:provider/provider.dart';
 import 'viewmodels/main_viewmodel.dart';
 import 'viewmodels/home_viewmodel.dart';
 import 'viewmodels/sort_viewmodel.dart';
 import 'viewmodels/apply_quota_viewmodel.dart';
 import 'viewmodels/mine_viewmodel.dart';
-import 'main_page.dart';
 
 /// Home模块的Provider包装器
 /// 提供所有ViewModel的依赖注入
@@ -22,7 +22,7 @@ class HomeProviders extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => ApplyQuotaViewModel()),
         ChangeNotifierProvider(create: (_) => MineViewModel()),
       ],
-      child: const MainPage(),
+      child: const HomePage(),
     );
   }
 }

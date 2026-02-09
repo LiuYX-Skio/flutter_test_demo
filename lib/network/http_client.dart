@@ -1,9 +1,10 @@
 import 'package:dio/dio.dart';
+import 'package:dio/io.dart';
+import 'package:flutter_test_demo/app/dialog/loading_manager.dart';
 import 'api_exception.dart';
 import 'api_response.dart';
 import 'http_config.dart';
 import 'json_converter_registry.dart';
-import '../dialog/loading_manager.dart';
 import 'interceptors/auth_interceptor.dart';
 import 'interceptors/log_interceptor.dart' as custom;
 
@@ -35,6 +36,18 @@ class HttpClient {
 
     // 添加日志拦截器
     if (config.enableLog) {
+      // 设置代理
+      (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (client) {
+        client.findProxy = (uri) {
+          // 走本机 8888 端口（比如 Charles / Fiddler）
+          return "PROXY 192.168.1.121:8989";
+        };
+
+        // 如果抓包时 HTTPS 证书不合法，可以忽略
+        client.badCertificateCallback = (cert, host, port) => true;
+
+        return client;
+      };
       _dio.interceptors.add(custom.LogInterceptor(enabled: true));
     }
   }
@@ -95,7 +108,6 @@ class HttpClient {
 
       // 如果响应数据是 Map，尝试解析为 ApiResponse
       if (response.data is Map<String, dynamic>) {
-        print("data: Map");
         final converter =
             fromJsonT ?? JsonConverterRegistry().getConverter<T>();
         final apiResponse = ApiResponse<T>.fromJson(
@@ -112,6 +124,7 @@ class HttpClient {
           if (onError != null) {
             onError(exception);
           }
+          print("data: failed :${apiResponse.message}");
           return null;
         }
 
@@ -131,6 +144,7 @@ class HttpClient {
           result = JsonConverterRegistry().convert<T>(response.data);
         }
         if (onSuccess != null) {
+          print("data: null");
           onSuccess(result);
         }
         return result;

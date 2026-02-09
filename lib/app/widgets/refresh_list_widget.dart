@@ -6,25 +6,27 @@ import 'loading_widget.dart';
 /// 通用下拉刷新列表组件
 class RefreshListWidget extends StatelessWidget {
   final RefreshController controller;
-  final VoidCallback onRefresh;
+  final VoidCallback? onRefresh;
   final VoidCallback? onLoading;
   final Widget child;
   final bool enablePullUp;
+  final bool enablePullDown;
 
   const RefreshListWidget({
-    Key? key,
+    super.key,
     required this.controller,
-    required this.onRefresh,
+    this.onRefresh,
     this.onLoading,
     required this.child,
     this.enablePullUp = true,
-  }) : super(key: key);
+    this.enablePullDown = true,
+  });
 
   @override
   Widget build(BuildContext context) {
     return SmartRefresher(
       controller: controller,
-      enablePullDown: true,
+      enablePullDown: enablePullDown,
       enablePullUp: enablePullUp,
       onRefresh: onRefresh,
       onLoading: onLoading,
@@ -64,7 +66,7 @@ class RefreshListWidget extends StatelessWidget {
               style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
             );
           }
-          return Container(
+          return SizedBox(
             height: 55.h,
             child: Center(child: body),
           );

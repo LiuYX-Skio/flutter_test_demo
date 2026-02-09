@@ -9,14 +9,14 @@ import 'views/mine_tab_view.dart';
 
 /// 主页面
 /// 包含底部导航栏和4个Tab页面
-class MainPage extends StatefulWidget {
-  const MainPage({Key? key}) : super(key: key);
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  State<MainPage> createState() => _MainPageState();
+  State<HomePage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with WidgetsBindingObserver {
+class _MainPageState extends State<HomePage> with WidgetsBindingObserver {
   late PageController _pageController;
   late MainViewModel _mainViewModel;
 

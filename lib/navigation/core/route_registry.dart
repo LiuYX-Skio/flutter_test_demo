@@ -7,6 +7,8 @@ import 'route_paths.dart';
 import '../config/route_config.dart';
 import '../../app/pages/home/home_providers.dart';
 import '../../app/pages/detail/shop_detail_page.dart';
+import '../../app/pages/login/login_providers.dart';
+import '../../app/pages/webview/webview_page.dart';
 
 /// 路由注册器 - 统一管理所有路由注册
 class RouteRegistry {
@@ -68,7 +70,7 @@ class RouteRegistry {
     RouteConfig().registerRoutes({
       RoutePaths.auth.login.path: RouteDefinition(
         name: RoutePaths.auth.login.path,
-        builder: (context) => const _PlaceholderPage(title: '登录'),
+        builder: (context) => const LoginProviders(),
       ),
       RoutePaths.auth.register.path: RouteDefinition(
         name: RoutePaths.auth.register.path,
@@ -175,7 +177,13 @@ class RouteRegistry {
       ),
       RoutePaths.other.webview.path: RouteDefinition(
         name: RoutePaths.other.webview.path,
-        builder: (context) => const _PlaceholderPage(title: '网页视图'),
+        builder: (context) {
+          // 从路由参数中获取URL和标题
+          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          final url = args?['url'] as String? ?? '';
+          final title = args?['title'] as String? ?? '网页视图';
+          return WebViewPage(url: url, title: title);
+        },
         withContainer: true,
       ),
       RoutePaths.other.share.path: RouteDefinition(
@@ -210,6 +218,17 @@ class RouteRegistry {
         name: RoutePaths.other.error.path,
         builder: (context) => const _PlaceholderPage(title: '错误提示'),
         opaque: false,
+      ),
+      // 月付相关路由
+      RoutePaths.other.supplementMessage.path: RouteDefinition(
+        name: RoutePaths.other.supplementMessage.path,
+        builder: (context) => const _PlaceholderPage(title: '补充信息'),
+        withContainer: true,
+      ),
+      RoutePaths.other.authMessage.path: RouteDefinition(
+        name: RoutePaths.other.authMessage.path,
+        builder: (context) => const _PlaceholderPage(title: '认证信息'),
+        withContainer: true,
       ),
     });
   }

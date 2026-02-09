@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter_test_demo/app/provider/user_provider.dart';
 
 /// 认证拦截器
 /// 用于在请求头中添加 Token 等认证信息
@@ -23,6 +24,7 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
+    print("token = "+UserProvider.getUserToken());
     // 获取 Token
     if (onGetToken != null) {
       final token = await onGetToken!();

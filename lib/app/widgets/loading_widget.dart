@@ -7,10 +7,10 @@ class LoadingWidget extends StatelessWidget {
   final double? size;
 
   const LoadingWidget({
-    Key? key,
+    super.key,
     this.message,
     this.size,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class LoadingWidget extends StatelessWidget {
 
 /// 小型加载指示器（用于列表底部）
 class SmallLoadingWidget extends StatelessWidget {
-  const SmallLoadingWidget({Key? key}) : super(key: key);
+  const SmallLoadingWidget({super.key});
 
   @override
   Widget build(BuildContext context) {

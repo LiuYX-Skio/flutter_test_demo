@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_boost/flutter_boost.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test_demo/CustomFlutterBinding.dart';
 import 'package:flutter_test_demo/app/constants/app_constants.dart';
+import 'package:flutter_test_demo/app/provider/user_provider.dart';
 import 'package:flutter_test_demo/navigation/core/route_paths.dart';
 import '../core/framework_initializer.dart';
 import 'navigation/navigation_initializer.dart';
@@ -16,11 +19,21 @@ void main() {
       networkConfig: NetworkConfig(
         baseUrl: AppConstants.baseUrl,
         enableLog: true,
+        onGetToken: () async {
+          return UserProvider.getUserToken();
+        },
       ),
       initNavigation: true,
     ),
   );
-  runApp(const ShopApp());
+  runZonedGuarded(
+    () {
+      runApp(const ShopApp());
+    },
+    (dynamic error, dynamic stack) {
+      print("Something went wrong!");
+    },
+  );
 }
 
 class ShopApp extends StatefulWidget {

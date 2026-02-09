@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_test_demo/app/widgets/empty_widget.dart';
+import 'package:flutter_test_demo/app/widgets/error_widget.dart';
+import 'package:flutter_test_demo/app/widgets/loading_widget.dart';
+import 'package:flutter_test_demo/app/widgets/refresh_list_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../viewmodels/sort_viewmodel.dart';
-import '../widgets/common/loading_widget.dart';
-import '../widgets/common/error_widget.dart';
-import '../widgets/common/empty_widget.dart';
-import '../widgets/common/refresh_list_widget.dart';
 import '../widgets/sort/ranking_list_widget.dart';
 
 /// 排行榜Tab视图

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../constants/app_colors.dart';
+import 'package:flutter_test_demo/app/constants/app_colors.dart';
 
 /// 启动页协议弹窗
 class SplashProtocolDialog extends StatelessWidget {
