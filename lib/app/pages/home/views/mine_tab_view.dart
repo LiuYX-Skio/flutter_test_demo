@@ -8,10 +8,12 @@ import '../../../../navigation/core/route_paths.dart';
 import '../viewmodels/mine_viewmodel.dart';
 import '../widgets/mine/user_order_view.dart';
 import '../widgets/mine/shop_recommend_view.dart';
+import '../../mine/widgets/user_month_view.dart';
+import '../../../../app/provider/user_provider.dart';
 
 /// 我的Tab视图 - 完全按照Android MineFragment实现
 class MineTabView extends StatefulWidget {
-  const MineTabView({Key? key}) : super(key: key);
+  const MineTabView({super.key});
 
   @override
   State<MineTabView> createState() => _MineTabViewState();
@@ -32,6 +34,11 @@ class _MineTabViewState extends State<MineTabView>
       _viewModel = Provider.of<MineViewModel>(context, listen: false);
       // 初始化商品列表 - 对应Android的recommendList(true)
       _viewModel.recommendList(true, 1, 20);
+      _viewModel.fetchUserInfo();
+      _viewModel.fetchUserCreditDetail();
+      UserProvider.updateUserInfo().then((_) {
+        _viewModel.updateUserState();
+      });
     });
   }
 
@@ -241,13 +248,10 @@ class _MineTabViewState extends State<MineTabView>
         right: 12.w,
         top: 10.h,
       ),
-      height: 120.h, // 根据Android布局估算高度
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
-      child: const Center(
-        child: Text('月付视图 - 待实现'),
+      child: UserMonthView(
+        monthPayInfo: viewModel.userInfo?.creditAppUser,
+        onMonthApply: () => _onMonthApply(viewModel),
+        onMonthBill: _onMonthBill,
       ),
     );
   }
@@ -330,8 +334,7 @@ class _MineTabViewState extends State<MineTabView>
 
   void _onServiceTap(MineViewModel viewModel) {
     if (viewModel.isLogin) {
-      // 客服页面
-      print('跳转到客服页面');
+      context.nav.push(RoutePaths.other.chatService);
     } else {
       context.nav.push(RoutePaths.auth.login);
     }
@@ -339,16 +342,61 @@ class _MineTabViewState extends State<MineTabView>
 
   void _onWalletTap(MineViewModel viewModel) {
     if (viewModel.isLogin) {
-      // 钱包页面
-      print('跳转到钱包页面');
+      context.nav.push(RoutePaths.user.wallet);
     } else {
       context.nav.push(RoutePaths.auth.login);
     }
   }
 
   void _onRecycleTap() {
-    // 回收页面
-    context.nav.push(RoutePaths.other.supplementMessage); // 暂时用补充信息页面代替
+    context.nav.push(RoutePaths.other.phoneRecycleMsg);
+  }
+
+  Future<void> _onMonthApply(MineViewModel viewModel) async {
+    if (!viewModel.isLogin) {
+      context.nav.push(RoutePaths.auth.login);
+      return;
+    }
+
+    await viewModel.fetchUserCreditDetail();
+    final creditDetail = viewModel.userCreditDetail;
+    final hasApply = creditDetail?.hasApply == true;
+    final status = creditDetail?.status ?? 0;
+
+    if (hasApply) {
+      if (status == 2) {
+        if (viewModel.isTestAccount) {
+          context.nav.push(RoutePaths.other.newMonthPay);
+        } else {
+          context.nav.push(RoutePaths.other.limitMoney);
+        }
+      } else if (status == 1) {
+        context.nav.push(RoutePaths.other.examineIng);
+      } else if (status == 3) {
+        context.nav.push(
+          RoutePaths.other.examineFail,
+          arguments: {'nextApplyTime': creditDetail?.nextApplyTime},
+        );
+      } else {
+        if (viewModel.userInfo?.hasAuthentication == true) {
+          context.nav.push(RoutePaths.other.supplementMessage);
+        } else {
+          context.nav.push(
+            RoutePaths.other.applyQuota,
+            arguments: {'hasApply': true},
+          );
+        }
+      }
+    } else {
+      context.nav.push(
+        RoutePaths.other.applyQuota,
+        arguments: {'hasApply': false},
+      );
+    }
+  }
+
+  void _onMonthBill() {
+    context.nav.push(RoutePaths.other.monthBill);
   }
 
   void _onLoading() async {

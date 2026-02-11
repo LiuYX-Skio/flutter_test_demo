@@ -118,6 +118,9 @@ class LoginViewModel extends ChangeNotifier {
         if (data != null) {
           isSuccess = true;
           UserProvider.setUserToken(data.token);
+          UserProvider.setUserNickName(data.nikeName);
+          UserProvider.setUserAvatar(data.avatar);
+          UserProvider.setUserPhone(data.phone);
           notifyListeners();
         } else {
           isSuccess = false;

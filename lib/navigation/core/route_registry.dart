@@ -1,14 +1,68 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_boost/flutter_boost.dart';
+import 'package:flutter_test_demo/app/pages/shop/shop_detail_page.dart';
+import 'package:flutter_test_demo/app/pages/shop/views/shop_big_photo_page.dart';
+import 'package:flutter_test_demo/app/pages/shop/views/shop_car_page.dart';
+import 'package:flutter_test_demo/app/pages/shop/views/shop_comment_list_page.dart';
+import 'package:flutter_test_demo/app/pages/shop/views/shop_search_page.dart';
+import 'package:flutter_test_demo/app/pages/shop/views/shop_sort_page.dart';
+import 'package:flutter_test_demo/app/pages/shop/viewmodels/shop_car_viewmodel.dart';
+import 'package:flutter_test_demo/app/pages/shop/viewmodels/shop_comment_viewmodel.dart';
+import 'package:flutter_test_demo/app/pages/shop/viewmodels/shop_search_viewmodel.dart';
+import 'package:flutter_test_demo/app/pages/shop/viewmodels/shop_sort_viewmodel.dart';
 import 'package:flutter_test_demo/app/pages/splash/splash_page.dart';
 import 'route_definition.dart';
 import 'route_paths.dart';
 import '../config/route_config.dart';
 import '../../app/pages/home/home_providers.dart';
-import '../../app/pages/detail/shop_detail_page.dart';
+import '../../app/pages/home/views/apply_quota_tab_view.dart';
+import '../../app/pages/home/viewmodels/apply_quota_viewmodel.dart';
+import '../../app/pages/home/views/auth_message_page.dart';
+import '../../app/pages/home/views/supplement_message_page.dart';
 import '../../app/pages/login/login_providers.dart';
 import '../../app/pages/webview/webview_page.dart';
+import '../../app/pages/mine/views/mine_bill_page.dart';
+import '../../app/pages/mine/views/limit_money_page.dart';
+import '../../app/pages/mine/views/recall_money_page.dart';
+import '../../app/pages/mine/views/examine_ing_page.dart';
+import '../../app/pages/mine/views/examine_fail_page.dart';
+import '../../app/pages/mine/viewmodels/month_pay_viewmodel.dart';
+import '../../app/pages/mine/views/system_setting_page.dart';
+import '../../app/pages/mine/views/account_safe_page.dart';
+import '../../app/pages/mine/views/account_safe_detail_page.dart';
+import '../../app/pages/mine/views/person_user_info_page.dart';
+import '../../app/pages/mine/views/mine_wallet_page.dart';
+import '../../app/pages/mine/views/with_draw_page.dart';
+import '../../app/pages/mine/views/with_draw_record_page.dart';
+import '../../app/pages/mine/views/about_mine_page.dart';
+import '../../app/pages/mine/views/mine_charge_page.dart';
+import '../../app/pages/mine/views/back_up_money_page.dart';
+import '../../app/pages/mine/views/back_up_success_page.dart';
+import '../../app/pages/mine/views/phone_recycle_msg_page.dart';
+import '../../app/pages/mine/viewmodels/wallet_viewmodel.dart';
+import '../../app/pages/mine/views/address_list_page.dart';
+import '../../app/pages/mine/viewmodels/address_viewmodel.dart';
+import '../../app/pages/mine/views/add_address_page.dart';
+import '../../app/pages/order/views/order_list_page.dart';
+import '../../app/pages/order/views/order_detail_page.dart';
+import '../../app/pages/order/views/pay_success_page.dart';
+import '../../app/pages/order/views/order_comment_page.dart';
+import '../../app/pages/order/views/config_order_page.dart';
+import '../../app/pages/order/views/shop_recycle_page.dart';
+import '../../app/pages/order/views/phone_recycle_order_page.dart';
+import '../../app/pages/order/views/shop_recycle_list_page.dart';
+import '../../app/pages/order/views/shop_can_recycle_list_page.dart';
+import '../../app/pages/order/views/shop_recycle_detail_page.dart';
+import '../../app/pages/order/views/gold_recycle_order_page.dart';
+import '../../app/pages/order/viewmodels/order_detail_viewmodel.dart';
+import '../../app/pages/order/viewmodels/config_order_viewmodel.dart';
+import '../../app/pages/order/models/order_models.dart';
+import '../../app/pages/pay/views/new_month_pay_page.dart';
+import '../../app/pages/pay/views/shop_pay_page.dart';
+import '../../app/pages/chat/views/chat_service_page.dart';
+import '../../app/pages/chat/viewmodels/chat_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 /// 路由注册器 - 统一管理所有路由注册
 class RouteRegistry {
@@ -41,8 +95,6 @@ class RouteRegistry {
       final route = routeEntry.value;
       routes[route.name] = _createBoostRouteFactory(route);
     }
-
-    print("路由表数量${routes.length}");
 
     return routes;
   }
@@ -93,12 +145,12 @@ class RouteRegistry {
     RouteConfig().registerRoutes({
       RoutePaths.user.profile.path: RouteDefinition(
         name: RoutePaths.user.profile.path,
-        builder: (context) => const _PlaceholderPage(title: '个人资料'),
+        builder: (context) => const PersonUserInfoPage(),
         withContainer: true,
       ),
       RoutePaths.user.settings.path: RouteDefinition(
         name: RoutePaths.user.settings.path,
-        builder: (context) => const _PlaceholderPage(title: '设置'),
+        builder: (context) => const SystemSettingPage(),
       ),
       RoutePaths.user.editProfile.path: RouteDefinition(
         name: RoutePaths.user.editProfile.path,
@@ -112,6 +164,55 @@ class RouteRegistry {
         name: RoutePaths.user.avatarCrop.path,
         builder: (context) => const _PlaceholderPage(title: '裁剪头像'),
         opaque: false,
+      ),
+      RoutePaths.user.addressList.path: RouteDefinition(
+        name: RoutePaths.user.addressList.path,
+        builder: (context) => ChangeNotifierProvider(
+          create: (_) => AddressViewModel(),
+          child: const AddressListPage(),
+        ),
+      ),
+      RoutePaths.user.addAddress.path: RouteDefinition(
+        name: RoutePaths.user.addAddress.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          final addressId = args?['addressId'] as String?;
+          return ChangeNotifierProvider(
+            create: (_) => AddressViewModel(),
+            child: AddAddressPage(addressId: addressId),
+          );
+        },
+      ),
+      RoutePaths.user.accountSafe.path: RouteDefinition(
+        name: RoutePaths.user.accountSafe.path,
+        builder: (context) => const AccountSafePage(),
+      ),
+      RoutePaths.user.accountSafeDetail.path: RouteDefinition(
+        name: RoutePaths.user.accountSafeDetail.path,
+        builder: (context) => const AccountSafeDetailPage(),
+      ),
+      RoutePaths.user.wallet.path: RouteDefinition(
+        name: RoutePaths.user.wallet.path,
+        builder: (context) => const MineWalletPage(),
+      ),
+      RoutePaths.user.withdraw.path: RouteDefinition(
+        name: RoutePaths.user.withdraw.path,
+        builder: (context) => ChangeNotifierProvider(
+          create: (_) => WalletViewModel(),
+          child: const WithDrawPage(),
+        ),
+      ),
+      RoutePaths.user.withdrawRecord.path: RouteDefinition(
+        name: RoutePaths.user.withdrawRecord.path,
+        builder: (context) => ChangeNotifierProvider(
+          create: (_) => WalletViewModel(),
+          child: const WithDrawRecordPage(),
+        ),
+      ),
+      RoutePaths.user.charge.path: RouteDefinition(
+        name: RoutePaths.user.charge.path,
+        builder: (context) => const MineChargePage(),
       ),
     });
   }
@@ -127,22 +228,71 @@ class RouteRegistry {
         name: RoutePaths.product.detail.path,
         builder: (context) {
           // 从路由参数中获取商品ID
-          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
           final productId = args?['id'] as int? ?? 0;
           return ShopDetailPage(productId: productId);
         },
       ),
+      RoutePaths.product.sort.path: RouteDefinition(
+        name: RoutePaths.product.sort.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return ChangeNotifierProvider(
+            create: (_) => ShopSortViewModel(),
+            child: ShopSortPage(sortId: args?['sortId'] as String?),
+          );
+        },
+      ),
       RoutePaths.product.search.path: RouteDefinition(
         name: RoutePaths.product.search.path,
-        builder: (context) => const _PlaceholderPage(title: '商品搜索'),
+        builder: (context) => ChangeNotifierProvider(
+          create: (_) => ShopSearchViewModel(),
+          child: const ShopSearchPage(),
+        ),
+      ),
+      RoutePaths.product.commentList.path: RouteDefinition(
+        name: RoutePaths.product.commentList.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          final id = args?['id'] as int? ?? 0;
+          return ChangeNotifierProvider(
+            create: (_) => ShopCommentViewModel(),
+            child: ShopCommentListPage(productId: id),
+          );
+        },
+      ),
+      RoutePaths.product.bigPhoto.path: RouteDefinition(
+        name: RoutePaths.product.bigPhoto.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return ShopBigPhotoPage(photo: args?['photo'] as String?);
+        },
+        type: RouteType.transparentDialog,
+        withContainer: false,
+        opaque: false,
+        barrierColor: null,
       ),
       RoutePaths.product.category.path: RouteDefinition(
         name: RoutePaths.product.category.path,
-        builder: (context) => const _PlaceholderPage(title: '商品分类'),
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return ChangeNotifierProvider(
+            create: (_) => ShopSortViewModel(),
+            child: ShopSortPage(sortId: args?['sortId'] as String?),
+          );
+        },
       ),
       RoutePaths.product.cart.path: RouteDefinition(
         name: RoutePaths.product.cart.path,
-        builder: (context) => const _PlaceholderPage(title: '购物车'),
+        builder: (context) => ChangeNotifierProvider(
+          create: (_) => ShopCarViewModel(),
+          child: const ShopCarPage(),
+        ),
       ),
       RoutePaths.product.checkout.path: RouteDefinition(
         name: RoutePaths.product.checkout.path,
@@ -173,13 +323,14 @@ class RouteRegistry {
       ),
       RoutePaths.other.about.path: RouteDefinition(
         name: RoutePaths.other.about.path,
-        builder: (context) => const _PlaceholderPage(title: '关于我们'),
+        builder: (context) => const AboutMinePage(),
       ),
       RoutePaths.other.webview.path: RouteDefinition(
         name: RoutePaths.other.webview.path,
         builder: (context) {
           // 从路由参数中获取URL和标题
-          final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
           final url = args?['url'] as String? ?? '';
           final title = args?['title'] as String? ?? '网页视图';
           return WebViewPage(url: url, title: title);
@@ -222,13 +373,255 @@ class RouteRegistry {
       // 月付相关路由
       RoutePaths.other.supplementMessage.path: RouteDefinition(
         name: RoutePaths.other.supplementMessage.path,
-        builder: (context) => const _PlaceholderPage(title: '补充信息'),
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return SupplementMessagePage(
+            isNeedClose: args?['isNeedClose'] as bool? ?? false,
+          );
+        },
         withContainer: true,
       ),
       RoutePaths.other.authMessage.path: RouteDefinition(
         name: RoutePaths.other.authMessage.path,
-        builder: (context) => const _PlaceholderPage(title: '认证信息'),
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return AuthMessagePage(
+            hasApply: args?['hasApply'] as bool? ?? false,
+            isNeedClose: args?['isNeedClose'] as bool? ?? false,
+          );
+        },
         withContainer: true,
+      ),
+      RoutePaths.other.applyQuota.path: RouteDefinition(
+        name: RoutePaths.other.applyQuota.path,
+        builder: (context) => ChangeNotifierProvider(
+          create: (_) => ApplyQuotaViewModel(),
+          child: const ApplyQuotaTabView(),
+        ),
+      ),
+      RoutePaths.other.monthBill.path: RouteDefinition(
+        name: RoutePaths.other.monthBill.path,
+        builder: (context) => ChangeNotifierProvider(
+          create: (_) => MonthPayViewModel(),
+          child: const MineBillPage(),
+        ),
+      ),
+      RoutePaths.other.limitMoney.path: RouteDefinition(
+        name: RoutePaths.other.limitMoney.path,
+        builder: (context) => ChangeNotifierProvider(
+          create: (_) => MonthPayViewModel(),
+          child: const LimitMoneyPage(),
+        ),
+      ),
+      RoutePaths.other.recallMoney.path: RouteDefinition(
+        name: RoutePaths.other.recallMoney.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return RecallMoneyPage(args: args ?? {});
+        },
+      ),
+      RoutePaths.other.examineIng.path: RouteDefinition(
+        name: RoutePaths.other.examineIng.path,
+        builder: (context) => const ExamineIngPage(),
+      ),
+      RoutePaths.other.examineFail.path: RouteDefinition(
+        name: RoutePaths.other.examineFail.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          final nextApplyTime = args?['nextApplyTime'] as String?;
+          return ExamineFailPage(nextApplyTime: nextApplyTime);
+        },
+      ),
+      RoutePaths.other.newMonthPay.path: RouteDefinition(
+        name: RoutePaths.other.newMonthPay.path,
+        builder: (context) => const NewMonthPayPage(),
+      ),
+      RoutePaths.other.backUpMoney.path: RouteDefinition(
+        name: RoutePaths.other.backUpMoney.path,
+        builder: (context) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider(create: (_) => MonthPayViewModel()),
+            ChangeNotifierProvider(create: (_) => WalletViewModel()),
+          ],
+          child: const BackUpMoneyPage(),
+        ),
+      ),
+      RoutePaths.other.backUpSuccess.path: RouteDefinition(
+        name: RoutePaths.other.backUpSuccess.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return BackUpSuccessPage(
+            alipayCode: args?['alipayCode']?.toString(),
+            money: args?['money']?.toString(),
+            extractPrice: args?['extractPrice']?.toString(),
+            handlingFee: args?['handlingFee']?.toString(),
+            purpose: args?['purpose']?.toString(),
+            name: args?['name']?.toString(),
+          );
+        },
+      ),
+      RoutePaths.other.goldRecycle.path: RouteDefinition(
+        name: RoutePaths.other.goldRecycle.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return ShopRecyclePage(
+            id: args?['id'] as String?,
+            recyclePrice: args?['recyclePrice'] as String?,
+            expressNumber: args?['expressNumber'] as String?,
+            orderInfoId: args?['orderInfoId'] as String?,
+          );
+        },
+      ),
+      RoutePaths.other.phoneRecycleMsg.path: RouteDefinition(
+        name: RoutePaths.other.phoneRecycleMsg.path,
+        builder: (context) => const PhoneRecycleMsgPage(),
+      ),
+      RoutePaths.other.recycleOrderList.path: RouteDefinition(
+        name: RoutePaths.other.recycleOrderList.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          final recycleType = args?['recycleType'] as String? ?? '1';
+          final currentPage = args?['currentPage'] as int? ?? 0;
+          return ShopRecycleListPage(
+            recycleType: recycleType,
+            currentPage: currentPage,
+          );
+        },
+      ),
+      RoutePaths.other.phoneRecycleOrder.path: RouteDefinition(
+        name: RoutePaths.other.phoneRecycleOrder.path,
+        builder: (context) => const PhoneRecycleOrderPage(),
+      ),
+      RoutePaths.other.shopCanRecycleList.path: RouteDefinition(
+        name: RoutePaths.other.shopCanRecycleList.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          final recycleType = args?['recycleType'] as String? ?? '1';
+          return ShopCanRecycleListPage(recycleType: recycleType);
+        },
+      ),
+      RoutePaths.other.shopRecycleDetail.path: RouteDefinition(
+        name: RoutePaths.other.shopRecycleDetail.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return ShopRecycleDetailPage(
+            id: args?['id'] as String? ?? '',
+            pageType: args?['pageType'] as int? ?? 1,
+            pageSource: args?['pageSource'] as int? ?? 0,
+            isCanCancelOrder: args?['isCanCancelOrder'] as bool? ?? true,
+          );
+        },
+      ),
+      RoutePaths.other.goldRecycleOrder.path: RouteDefinition(
+        name: RoutePaths.other.goldRecycleOrder.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          final currentPage = args?['currentPage'] as int? ?? 0;
+          return GoldRecycleOrderPage(currentPage: currentPage);
+        },
+      ),
+      RoutePaths.other.orderList.path: RouteDefinition(
+        name: RoutePaths.other.orderList.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          final currentPage = args?['currentPage'] as int? ?? 0;
+          final isSelectDeliver = args?['isSelectDeliver'] as bool? ?? false;
+          return OrderListPage(
+            currentPage: currentPage,
+            isSelectDeliver: isSelectDeliver,
+          );
+        },
+      ),
+      RoutePaths.other.orderDetail.path: RouteDefinition(
+        name: RoutePaths.other.orderDetail.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          final orderId = args?['orderId'] as String? ?? '';
+          return ChangeNotifierProvider(
+            create: (_) => OrderDetailViewModel(),
+            child: OrderDetailPage(orderId: orderId),
+          );
+        },
+      ),
+      RoutePaths.other.orderPaySuccess.path: RouteDefinition(
+        name: RoutePaths.other.orderPaySuccess.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          final orderId = args?['orderId'] as String? ?? '';
+          return ChangeNotifierProvider(
+            create: (_) => OrderDetailViewModel(),
+            child: PaySuccessPage(orderId: orderId),
+          );
+        },
+      ),
+      RoutePaths.other.shopPay.path: RouteDefinition(
+        name: RoutePaths.other.shopPay.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return ShopPayPage(
+            orderNo: args?['orderNo'] as String?,
+            orderId: args?['orderId'] as String?,
+            payMoney: args?['payMoney'] as String?,
+            hasMonthCredit: args?['hasMonthCredit'] as bool? ?? true,
+            viewType: args?['viewType'] as int? ?? 0,
+          );
+        },
+      ),
+      RoutePaths.other.orderComment.path: RouteDefinition(
+        name: RoutePaths.other.orderComment.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return ChangeNotifierProvider(
+            create: (_) => OrderDetailViewModel(),
+            child: OrderCommentPage(
+              productId: args?['productId'] as String?,
+              orderNo: args?['orderNo'] as String?,
+              storeName: args?['storeName'] as String?,
+              imageUrl: args?['image'] as String?,
+            ),
+          );
+        },
+      ),
+      RoutePaths.other.configOrder.path: RouteDefinition(
+        name: RoutePaths.other.configOrder.path,
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          final items =
+              (args?['items'] as List<ConfigOrderDeliveryEntity>?) ?? [];
+          final addressId = args?['addressId'] as String?;
+          final preOrderType = args?['preOrderType'] as String?;
+          return ChangeNotifierProvider(
+            create: (_) => ConfigOrderViewModel(),
+            child: ConfigOrderPage(
+              items: items,
+              addressId: addressId,
+              preOrderType: preOrderType,
+            ),
+          );
+        },
+      ),
+      RoutePaths.other.chatService.path: RouteDefinition(
+        name: RoutePaths.other.chatService.path,
+        builder: (context) => ChangeNotifierProvider(
+          create: (_) => ChatViewModel(),
+          child: const ChatServicePage(),
+        ),
       ),
     });
   }

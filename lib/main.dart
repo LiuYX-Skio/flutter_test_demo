@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boost/flutter_boost.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test_demo/CustomFlutterBinding.dart';
 import 'package:flutter_test_demo/app/constants/app_constants.dart';
 import 'package:flutter_test_demo/app/provider/user_provider.dart';
@@ -12,22 +13,21 @@ import '../core/framework_initializer.dart';
 import 'navigation/navigation_initializer.dart';
 
 void main() {
-  CustomFlutterBinding();
-  // 初始化所有框架
-  FrameworkInitializer.initAll(
-    FrameworkConfig(
-      networkConfig: NetworkConfig(
-        baseUrl: AppConstants.baseUrl,
-        enableLog: true,
-        onGetToken: () async {
-          return UserProvider.getUserToken();
-        },
-      ),
-      initNavigation: true,
-    ),
-  );
-  runZonedGuarded(
-    () {
+  runZonedGuarded(() {
+      CustomFlutterBinding();
+      // 初始化所有框架
+      FrameworkInitializer.initAll(
+        FrameworkConfig(
+          networkConfig: NetworkConfig(
+            baseUrl: AppConstants.baseUrl,
+            enableLog: true,
+            onGetToken: () async {
+              return UserProvider.getUserToken();
+            },
+          ),
+          initNavigation: true,
+        ),
+      );
       runApp(const ShopApp());
     },
     (dynamic error, dynamic stack) {
@@ -49,8 +49,17 @@ class _NavigationAppState extends State<ShopApp> {
     super.initState();
   }
 
+  Future<bool> _onWillPop() async {
+    final appState = BoostNavigator.instance.appState;
+    if (appState != null) {
+      await appState.pop(onBackPressed: true);
+    }
+    return false;
+  }
+
   /// 应用构建器
   Widget appBuilder(Widget home) {
+    final TransitionBuilder easyLoadingBuilder = EasyLoading.init();
     return ScreenUtilInit(
       designSize: const Size(375, 817),
       minTextAdapt: true,
@@ -59,7 +68,12 @@ class _NavigationAppState extends State<ShopApp> {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           home: home,
-          builder: EasyLoading.init(), // 直接初始化 EasyLoading
+          builder: (BuildContext context, Widget? child) {
+            return WillPopScope(
+              onWillPop: _onWillPop,
+              child: easyLoadingBuilder(context, child),
+            );
+          },
         );
       },
     );

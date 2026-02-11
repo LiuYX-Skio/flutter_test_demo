@@ -61,7 +61,7 @@ class RoutePath {
 class AuthRoutes {
   const AuthRoutes._();
 
-  final RoutePath login = const RoutePath('login'); // 对应Android的UNION_LOGIN_ACTIVITY
+  final RoutePath login = const RoutePath('login');
   final RoutePath register = const RoutePath('auth/register');
   final RoutePath forgotPassword = const RoutePath('auth/forgot_password');
   final RoutePath verifyCode = const RoutePath('auth/verify_code');
@@ -78,9 +78,19 @@ class UserRoutes {
   final RoutePath editProfile = const RoutePath('user/edit_profile');
   final RoutePath changePassword = const RoutePath('user/change_password');
   final RoutePath avatarCrop = const RoutePath('user/avatar_crop');
+  final RoutePath addressList = const RoutePath('user/address_list');
+  final RoutePath addAddress = const RoutePath('user/add_address');
+  final RoutePath accountSafe = const RoutePath('user/account_safe');
+  final RoutePath accountSafeDetail = const RoutePath('user/account_safe_detail');
+  final RoutePath wallet = const RoutePath('user/wallet');
+  final RoutePath withdraw = const RoutePath('user/withdraw');
+  final RoutePath withdrawRecord = const RoutePath('user/withdraw_record');
+  final RoutePath charge = const RoutePath('user/charge');
 
   List<RoutePath> get all => [
-    profile, settings, editProfile, changePassword, avatarCrop
+    profile, settings, editProfile, changePassword, avatarCrop,
+    addressList, addAddress, accountSafe, accountSafeDetail, wallet, withdraw,
+    withdrawRecord, charge,
   ];
 }
 
@@ -90,14 +100,17 @@ class ProductRoutes {
 
   final RoutePath list = const RoutePath('product/list');
   final RoutePath detail = const RoutePath('product/detail');
+  final RoutePath sort = const RoutePath('product/sort');
   final RoutePath search = const RoutePath('product/search');
+  final RoutePath commentList = const RoutePath('product/comment_list');
+  final RoutePath bigPhoto = const RoutePath('product/big_photo');
   final RoutePath category = const RoutePath('product/category');
   final RoutePath cart = const RoutePath('product/cart');
   final RoutePath checkout = const RoutePath('product/checkout');
   final RoutePath orderConfirm = const RoutePath('product/order_confirm');
 
   List<RoutePath> get all => [
-    list, detail, search, category, cart, checkout, orderConfirm
+    list, detail, sort, search, commentList, bigPhoto, category, cart, checkout, orderConfirm
   ];
 }
 
@@ -119,10 +132,39 @@ class OtherRoutes {
   // 月付相关路由
   final RoutePath supplementMessage = const RoutePath('home/supplement_message');
   final RoutePath authMessage = const RoutePath('home/auth_message');
+  final RoutePath applyQuota = const RoutePath('home/apply_quota');
+  final RoutePath monthBill = const RoutePath('mine/month_bill');
+  final RoutePath limitMoney = const RoutePath('mine/limit_money');
+  final RoutePath recallMoney = const RoutePath('mine/recall_money');
+  final RoutePath examineIng = const RoutePath('mine/examine_ing');
+  final RoutePath examineFail = const RoutePath('mine/examine_fail');
+  final RoutePath newMonthPay = const RoutePath('mine/new_month_pay');
+  final RoutePath backUpMoney = const RoutePath('mine/back_up_money');
+  final RoutePath backUpSuccess = const RoutePath('mine/back_up_success');
+  final RoutePath goldRecycle = const RoutePath('mine/gold_recycle');
+  final RoutePath phoneRecycleMsg = const RoutePath('mine/phone_recycle_msg');
+  final RoutePath recycleOrderList = const RoutePath('order/recycle_list');
+  final RoutePath phoneRecycleOrder = const RoutePath('order/phone_recycle');
+  final RoutePath shopCanRecycleList = const RoutePath('order/shop_can_recycle_list');
+  final RoutePath shopRecycleDetail = const RoutePath('order/shop_recycle_detail');
+  final RoutePath goldRecycleOrder = const RoutePath('order/gold_recycle_order');
+  final RoutePath orderList = const RoutePath('order/list');
+  final RoutePath orderDetail = const RoutePath('order/detail');
+  final RoutePath orderPaySuccess = const RoutePath('order/pay_success');
+  final RoutePath shopPay = const RoutePath('pay/shop_pay');
+  final RoutePath orderComment = const RoutePath('order/comment');
+  final RoutePath configOrder = const RoutePath('order/config');
+  final RoutePath chatService = const RoutePath('chat/service');
 
   List<RoutePath> get all => [
     notificationList, notificationDetail, feedback, about,
     webview, share, imagePreview, loading, confirm, error,
-    supplementMessage, authMessage
+    supplementMessage, authMessage, applyQuota, monthBill, limitMoney,
+    recallMoney, examineIng, examineFail, newMonthPay, backUpMoney,
+    backUpSuccess,
+    goldRecycle, phoneRecycleMsg, recycleOrderList, phoneRecycleOrder,
+    shopCanRecycleList, shopRecycleDetail, goldRecycleOrder,
+    orderList, orderDetail, orderPaySuccess, shopPay, orderComment, configOrder,
+    chatService,
   ];
 }

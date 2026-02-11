@@ -9,12 +9,15 @@ import 'middle_ware.dart';
 
 /// 导航服务类 - 封装 Flutter Boost 路由 API
 class NavigatorService {
-  static final NavigatorService _instance = NavigatorService._internal();
-  factory NavigatorService() => _instance;
+  static final NavigatorService instance = NavigatorService._internal();
+
+  factory NavigatorService() => instance;
+
   NavigatorService._internal();
 
   final MiddlewareManager _middlewareManager = MiddlewareManager();
-  final StreamController<String> _routeChangesController = StreamController<String>.broadcast();
+  final StreamController<String> _routeChangesController =
+      StreamController<String>.broadcast();
   String? _currentRoute;
 
   /// 注册路由
@@ -39,7 +42,8 @@ class NavigatorService {
     bool withContainer = false,
     bool opaque = true,
   }) async {
-    final String path = routeName is RoutePath ? routeName.path : routeName as String;
+    final String path =
+        routeName is RoutePath ? routeName.path : routeName as String;
     try {
       final route = RouteConfig().getRoute(path);
       if (route == null) {
@@ -78,7 +82,8 @@ class NavigatorService {
     Map<String, dynamic>? arguments,
     bool withContainer = false,
   }) async {
-    final String path = routeName is RoutePath ? routeName.path : routeName as String;
+    final String path =
+        routeName is RoutePath ? routeName.path : routeName as String;
     try {
       final route = RouteConfig().getRoute(path);
       if (route == null) {
@@ -115,7 +120,8 @@ class NavigatorService {
     Map<String, dynamic>? arguments,
     bool withContainer = false,
   }) async {
-    final String path = routeName is RoutePath ? routeName.path : routeName as String;
+    final String path =
+        routeName is RoutePath ? routeName.path : routeName as String;
     try {
       final route = RouteConfig().getRoute(path);
       if (route == null) {
@@ -151,7 +157,8 @@ class NavigatorService {
     dynamic routeName, {
     Map<String, dynamic>? arguments,
   }) async {
-    final String path = routeName is RoutePath ? routeName.path : routeName as String;
+    final String path =
+        routeName is RoutePath ? routeName.path : routeName as String;
     try {
       final route = RouteConfig().getRoute(path);
       if (route == null) {
@@ -198,7 +205,8 @@ class NavigatorService {
     dynamic routeName, {
     Map<String, dynamic>? arguments,
   }) async {
-    final String path = routeName is RoutePath ? routeName.path : routeName as String;
+    final String path =
+        routeName is RoutePath ? routeName.path : routeName as String;
     try {
       pop(); // 先关闭当前页面
       return await push<T>(path, arguments: arguments);
@@ -213,7 +221,8 @@ class NavigatorService {
     Map<String, dynamic>? arguments,
     dynamic untilRoute,
   }) async {
-    final String path = routeName is RoutePath ? routeName.path : routeName as String;
+    final String path =
+        routeName is RoutePath ? routeName.path : routeName as String;
     try {
       // Flutter Boost 不直接支持 pushAndRemoveUntil
       // 这里可以根据实际情况实现
@@ -228,7 +237,8 @@ class NavigatorService {
 
   /// 检查路由是否存在
   bool hasRoute(dynamic routeName) {
-    final String path = routeName is RoutePath ? routeName.path : routeName as String;
+    final String path =
+        routeName is RoutePath ? routeName.path : routeName as String;
     return RouteConfig().hasRoute(path);
   }
 
@@ -250,19 +260,25 @@ class NavigatorService {
 extension NavigatorServiceExtensions on BuildContext {
   NavigatorService get nav => NavigatorService();
 
-  Future<RouteResult<T?>> push<T>(dynamic routeName, {Map<String, dynamic>? arguments}) {
+  Future<RouteResult<T?>> push<T>(dynamic routeName,
+      {Map<String, dynamic>? arguments}) {
     return NavigatorService().push<T>(routeName, arguments: arguments);
   }
 
-  Future<RouteResult<T?>> pushDialog<T>(dynamic routeName, {Map<String, dynamic>? arguments}) {
+  Future<RouteResult<T?>> pushDialog<T>(dynamic routeName,
+      {Map<String, dynamic>? arguments}) {
     return NavigatorService().pushDialog<T>(routeName, arguments: arguments);
   }
 
-  Future<RouteResult<T?>> pushBottomSheet<T>(dynamic routeName, {Map<String, dynamic>? arguments}) {
-    return NavigatorService().pushBottomSheet<T>(routeName, arguments: arguments);
+  Future<RouteResult<T?>> pushBottomSheet<T>(dynamic routeName,
+      {Map<String, dynamic>? arguments}) {
+    return NavigatorService()
+        .pushBottomSheet<T>(routeName, arguments: arguments);
   }
 
-  Future<RouteResult<T?>> pushTransparentDialog<T>(dynamic routeName, {Map<String, dynamic>? arguments}) {
-    return NavigatorService().pushTransparentDialog<T>(routeName, arguments: arguments);
+  Future<RouteResult<T?>> pushTransparentDialog<T>(dynamic routeName,
+      {Map<String, dynamic>? arguments}) {
+    return NavigatorService()
+        .pushTransparentDialog<T>(routeName, arguments: arguments);
   }
 }

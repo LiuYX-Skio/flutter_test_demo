@@ -1,5 +1,11 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
 import 'package:flutter_test_demo/app/provider/user_provider.dart';
+
+import '../../app/constants/app_constants.dart';
+import '../../navigation/core/navigator_service.dart';
+import '../../navigation/core/route_paths.dart';
 
 /// 认证拦截器
 /// 用于在请求头中添加 Token 等认证信息
@@ -29,10 +35,34 @@ class AuthInterceptor extends Interceptor {
     if (onGetToken != null) {
       final token = await onGetToken!();
       if (token != null && token.isNotEmpty) {
-        options.headers['Authorization'] = 'Bearer $token';
+        options.headers['Authori-zation'] = token;
       }
     }
     super.onRequest(options, handler);
+  }
+
+  @override
+  void onResponse(Response response, ResponseInterceptorHandler handler) {
+    try {
+      dynamic data = response.data;
+      Map<String, dynamic>? json;
+      if (data is Map<String, dynamic>) {
+        json = data;
+      } else if (data is String) {
+        json = jsonDecode(data) as Map<String, dynamic>;
+      }
+      if (json != null) {
+        final code = json['code'] as int? ?? json['status'] as int? ?? 0;
+        if (code == AppConstants.AUTH_LOGIN_CODE) {
+          UserProvider.clearUserInfo();
+          NavigatorService.instance.push(RoutePaths.auth.login);
+        }
+      }
+    } catch (e) {
+      print("AuthInterceptor error $e");
+    }
+
+    super.onResponse(response, handler);
   }
 
   @override

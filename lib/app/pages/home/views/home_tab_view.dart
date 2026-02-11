@@ -54,18 +54,6 @@ class _HomeTabViewState extends State<HomeTabView>
       backgroundColor: const Color(0xFFF7F9FC), // color_F7F9FC
       body: Consumer<HomeViewModel>(
         builder: (context, viewModel, child) {
-          // 首次加载
-          if (viewModel.isLoading && viewModel.homeData == null) {
-            return const LoadingWidget(message: '加载中...');
-          }
-
-          // 加载失败
-          if (viewModel.errorMessage != null && viewModel.homeData == null) {
-            return ErrorStateWidget(
-              message: viewModel.errorMessage,
-              onRetry: () => viewModel.refresh(),
-            );
-          }
 
           return RefreshListWidget(
             controller: _refreshController,

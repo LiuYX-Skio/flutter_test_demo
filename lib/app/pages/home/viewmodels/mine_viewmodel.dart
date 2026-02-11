@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/user_models.dart';
+import '../../../provider/user_provider.dart';
 import '../models/product_models.dart';
 import '../api/user_api.dart';
 import '../api/product_api.dart';
@@ -10,6 +11,8 @@ import '../api/product_api.dart';
 class MineViewModel extends ChangeNotifier {
   // 用户信息
   UserInfoEntity? _userInfo;
+  // 月付申请详情
+  UserCreditEntity? _userCreditDetail;
 
   // 推荐商品列表
   List<ProductEntity> _productList = [];
@@ -33,6 +36,7 @@ class MineViewModel extends ChangeNotifier {
 
   // Getters
   UserInfoEntity? get userInfo => _userInfo;
+  UserCreditEntity? get userCreditDetail => _userCreditDetail;
   List<ProductEntity> get productList => _productList;
   int get currentPage => _currentPage;
   bool get isLoading => _isLoading;
@@ -47,21 +51,32 @@ class MineViewModel extends ChangeNotifier {
 
   // 计算属性 - 用户名
   String get userName {
-    if (_isLogin && _userInfo?.nickname != null) {
-      return _userInfo!.nickname!;
+    if (_isLogin) {
+      final name = UserProvider.getUserNickName();
+      if (name.isNotEmpty) return name;
+      if (_userInfo?.nickname != null) return _userInfo!.nickname!;
     }
     return '立即登录'; // app_login string
   }
 
   // 计算属性 - 用户头像
-  String? get userAvatar => _userInfo?.avatar;
+  String? get userAvatar {
+    if (_isLogin) {
+      final avatar = UserProvider.getUserAvatar();
+      if (avatar.isNotEmpty) return avatar;
+    }
+    return _userInfo?.avatar;
+  }
 
   // 计算属性 - 用户手机号
   String get userPhone {
-    if (_isLogin && _userInfo?.phone != null && _userInfo!.phone!.length >= 7) {
-      // 手机号格式化：138****1234
-      final phone = _userInfo!.phone!;
-      return '${phone.substring(0, 3)}****${phone.substring(7)}';
+    if (_isLogin) {
+      final rawPhone = UserProvider.getUserPhone();
+      final phone = rawPhone.isNotEmpty ? rawPhone : (_userInfo?.phone ?? '');
+      if (phone.length >= 7) {
+        return '${phone.substring(0, 3)}****${phone.substring(7)}';
+      }
+      return phone;
     }
     return '登录后享受更多服务'; // app_login_desc string
   }
@@ -74,6 +89,7 @@ class MineViewModel extends ChangeNotifier {
 
     await Future.wait([
       fetchUserInfo(),
+      fetchUserCreditDetail(),
       fetchProductList(1),
     ]);
 
@@ -85,9 +101,10 @@ class MineViewModel extends ChangeNotifier {
   void updateUserState() {
     // 这里应该从某种状态管理或SharedPreferences中获取用户状态
     // 暂时使用模拟数据
-    _isLogin = _userInfo != null;
-    _isTestAccount = false; // 暂时设为false
-    _isMonthPayOpen = true; // 暂时设为true
+    _isLogin = UserProvider.isLogin();
+    _isTestAccount = _userInfo?.hasTestAccount ?? false;
+    _isMonthPayOpen =
+        (_userCreditDetail?.hasApply == true && _userCreditDetail?.status == 2);
     _hasUserInfo = _userInfo != null;
 
     notifyListeners();
@@ -119,14 +136,35 @@ class MineViewModel extends ChangeNotifier {
         if (result != null) {
           _userInfo = result;
           _errorMessage = null;
+          UserProvider.setUserNickName(result.nickname);
+          UserProvider.setUserPhone(result.phone);
+          UserProvider.setUserAvatar(result.avatar);
+          UserProvider.setUserMoney(result.nowMoney?.toString());
         }
         _isLoading = false;
+        updateUserState();
         notifyListeners();
       },
       onError: (exception) {
         _errorMessage = '获取用户信息失败';
         print('获取用户信息失败: $exception');
         _isLoading = false;
+        notifyListeners();
+      },
+    );
+  }
+
+  /// 获取用户信用详情 (月付申请详情)
+  Future<void> fetchUserCreditDetail() async {
+    await UserApi.getUserCreditDetail(
+      onSuccess: (result) {
+        _userCreditDetail = result;
+        _errorMessage = null;
+        updateUserState();
+      },
+      onError: (exception) {
+        _errorMessage = '获取信用详情失败';
+        print('获取用户信用详情失败: $exception');
         notifyListeners();
       },
     );
@@ -176,5 +214,39 @@ class MineViewModel extends ChangeNotifier {
   /// 获取推荐商品列表 (原有方法，保持兼容)
   Future<void> fetchProductList(int page) async {
     await recommendList(page == 1, page, 20); // 默认limit为20
+  }
+
+  /// 退出登录
+  Future<void> loginOut({
+    required VoidCallback onSuccess,
+  }) async {
+    await UserApi.loginOut(
+      onSuccess: (_) async {
+        await UserProvider.clearUserInfo();
+        updateUserState();
+        onSuccess();
+      },
+      onError: (exception) {
+        _errorMessage = '退出登录失败';
+        debugPrint('退出登录失败: ${exception.message}');
+      },
+    );
+  }
+
+  /// 注销账号
+  Future<void> cancelAccount({
+    required VoidCallback onSuccess,
+  }) async {
+    await UserApi.cancelAccount(
+      onSuccess: (_) async {
+        await UserProvider.clearUserInfo();
+        updateUserState();
+        onSuccess();
+      },
+      onError: (exception) {
+        _errorMessage = '注销账号失败';
+        debugPrint('注销账号失败: ${exception.message}');
+      },
+    );
   }
 }

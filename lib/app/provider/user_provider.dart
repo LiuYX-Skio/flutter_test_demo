@@ -9,6 +9,10 @@ class UserProvider {
   static const String _lastIpKey = 'user_lastIp';
   static const String _inviteCodeKey = 'user_inviteCode';
   static const String _userTokenKey = 'user_token';
+  static const String _userNickNameKey = 'user_nick_name';
+  static const String _userPhoneKey = 'user_phone';
+  static const String _userAvatarKey = 'user_avatar';
+  static const String _userMoneyKey = 'user_money';
 
   static String? _oaid = "";
   static String? _idfa = "";
@@ -16,6 +20,10 @@ class UserProvider {
   static String? _inviteCode = "";
   static String? _userToken = "";
   static String? _deviceModel = "";
+  static String? _userNickName = "";
+  static String? _userPhone = "";
+  static String? _userAvatar = "";
+  static String? _userMoney = "";
 
   static Future<void> updateUserInfo() async {
     _oaid = await SharedPreferencesUtil.getString(_oaidKey);
@@ -25,6 +33,11 @@ class UserProvider {
     _userToken = await SharedPreferencesUtil.getString(_userTokenKey);
     _lastIp = await SharedPreferencesUtil.getString(_lastIpKey);
     _inviteCode = await SharedPreferencesUtil.getString(_inviteCodeKey);
+
+    _userNickName = await SharedPreferencesUtil.getString(_userNickNameKey);
+    _userPhone = await SharedPreferencesUtil.getString(_userPhoneKey);
+    _userAvatar = await SharedPreferencesUtil.getString(_userAvatarKey);
+    _userMoney = await SharedPreferencesUtil.getString(_userMoneyKey);
   }
 
   /// 设置用户协议同意状态
@@ -62,6 +75,48 @@ class UserProvider {
       await SharedPreferencesUtil.setString(_idfaKey, idfa);
     } else {
       await SharedPreferencesUtil.remove(_idfaKey);
+    }
+    updateUserInfo();
+  }
+
+
+
+  /// 存储昵称
+  static Future<void> setUserNickName(String? content) async {
+    if (content != null && content.isNotEmpty) {
+      await SharedPreferencesUtil.setString(_userNickNameKey, content);
+    } else {
+      await SharedPreferencesUtil.remove(_userNickNameKey);
+    }
+    updateUserInfo();
+  }
+
+  /// 存储手机号
+  static Future<void> setUserPhone(String? content) async {
+    if (content != null && content.isNotEmpty) {
+      await SharedPreferencesUtil.setString(_userPhoneKey, content);
+    } else {
+      await SharedPreferencesUtil.remove(_userPhoneKey);
+    }
+    updateUserInfo();
+  }
+
+  /// 存储头像
+  static Future<void> setUserAvatar(String? content) async {
+    if (content != null && content.isNotEmpty) {
+      await SharedPreferencesUtil.setString(_userAvatarKey, content);
+    } else {
+      await SharedPreferencesUtil.remove(_userAvatarKey);
+    }
+    updateUserInfo();
+  }
+
+  /// 存储用户余额
+  static Future<void> setUserMoney(String? content) async {
+    if (content != null && content.isNotEmpty) {
+      await SharedPreferencesUtil.setString(_userMoneyKey, content);
+    } else {
+      await SharedPreferencesUtil.remove(_userMoneyKey);
     }
     updateUserInfo();
   }
@@ -116,6 +171,32 @@ class UserProvider {
     return StringUtils.getNotNullParam(_userToken);
   }
 
+
+  /// 是否登录
+  static bool isLogin() {
+    return !StringUtils.isEmpty(_userToken);
+  }
+
+  /// 获取昵称
+  static String getUserNickName() {
+    return StringUtils.getNotNullParam(_userNickName);
+  }
+
+  /// 获取手机号
+  static String getUserPhone() {
+    return StringUtils.getNotNullParam(_userPhone);
+  }
+
+  /// 获取头像
+  static String getUserAvatar() {
+    return StringUtils.getNotNullParam(_userAvatar);
+  }
+
+  /// 获取用户余额
+  static String getUserMoney() {
+    return StringUtils.getNotNullParam(_userMoney);
+  }
+
   /// 获取IDFA (设备标识符)
   static String getIdfa() {
     return StringUtils.getNotNullParam(_idfa);
@@ -135,6 +216,23 @@ class UserProvider {
   static String getDeviceModel() {
     return StringUtils.getNotNullParam(_deviceModel);
   }
+
+
+  /// 清空用户信息
+  static Future<void> clearUserInfo() async {
+    await SharedPreferencesUtil.remove(_userTokenKey);
+    await SharedPreferencesUtil.remove(_userPhoneKey);
+    await SharedPreferencesUtil.remove(_userNickNameKey);
+    await SharedPreferencesUtil.remove(_userAvatarKey);
+    await SharedPreferencesUtil.remove(_userMoneyKey);
+    _userToken = "";
+    _userPhone = "";
+    _userNickName = "";
+    _userAvatar = "";
+    _userMoney = "";
+    updateUserInfo();
+  }
+
 
   /// 移除OAID
   static Future<void> removeOaid() async {

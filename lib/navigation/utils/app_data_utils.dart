@@ -28,4 +28,16 @@ class AppDataUtils {
     if (value is bool) return value.toString();
     return value.toString();
   }
+
+  /// 将任意类型转换为 bool
+  static bool? toBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    if (value is int) return value == 1;
+    if (value is String) {
+      if (value == '1' || value.toLowerCase() == 'true') return true;
+      if (value == '0' || value.toLowerCase() == 'false') return false;
+    }
+    return null;
+  }
 }

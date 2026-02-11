@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_test_demo/app/dialog/loading_manager.dart';
 import '../models/home_models.dart';
 import '../models/product_models.dart';
 import '../api/home_api.dart';
@@ -37,11 +38,12 @@ class HomeViewModel extends ChangeNotifier {
     _currentPage = 1;
     _hasMore = true;
     _errorMessage = null;
-
+    LoadingManager.instance.show();
     await Future.wait([
       fetchHomeData(),
       fetchProductList(1),
     ]);
+    LoadingManager.instance.dismiss();
   }
 
   /// 加载更多商品
@@ -52,7 +54,6 @@ class HomeViewModel extends ChangeNotifier {
 
     try {
       final nextPage = _currentPage + 1;
-      print("加载更多商品$_currentPage");
       await fetchProductList(nextPage);
     } finally {
       _isLoadingMore = false;
@@ -71,7 +72,6 @@ class HomeViewModel extends ChangeNotifier {
           _errorMessage = null;
         }
         _isLoading = false;
-        print("getHomeData${_homeData?.banner?.length}");
         notifyListeners();
       },
       onError: (exception) {
@@ -88,7 +88,6 @@ class HomeViewModel extends ChangeNotifier {
       page: page,
       onSuccess: (result) {
         if (result != null && result.list != null) {
-          print("获取商品列表成功${result.list}");
           if (page == 1) {
             _productList = result.list!;
           } else {
@@ -99,7 +98,6 @@ class HomeViewModel extends ChangeNotifier {
                      (result.totalPage == null || page < result.totalPage!);
           _errorMessage = null;
         } else {
-          print("获取商品列表成功 No data");
           _hasMore = false;
         }
         notifyListeners();

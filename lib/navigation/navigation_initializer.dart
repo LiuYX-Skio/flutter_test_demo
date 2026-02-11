@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_boost/flutter_boost.dart';
+import 'package:flutter_test_demo/navigation/core/route_paths.dart';
 import 'core/route_registry.dart';
 import 'core/lifecycle_observer.dart';
 import 'utils/platform_bridge.dart';
@@ -109,7 +110,7 @@ class _NavigationAppState extends State<NavigationApp> {
     return FlutterBoostApp(
       routeFactory,
       appBuilder: appBuilder,
-      initialRoute: "home", // 使用新的路由名称
+      initialRoute: RoutePaths.home.path, // 使用新的路由名称
     );
   }
 }

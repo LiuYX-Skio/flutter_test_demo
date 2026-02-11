@@ -1,6 +1,9 @@
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
+import 'package:flutter_test_demo/app/constants/app_constants.dart';
 import 'package:flutter_test_demo/app/dialog/loading_manager.dart';
+import 'package:flutter_test_demo/navigation/core/navigator_service.dart';
+import 'package:flutter_test_demo/navigation/core/route_paths.dart';
 import 'api_exception.dart';
 import 'api_response.dart';
 import 'http_config.dart';
@@ -37,17 +40,17 @@ class HttpClient {
     // 添加日志拦截器
     if (config.enableLog) {
       // 设置代理
-      (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (client) {
-        client.findProxy = (uri) {
-          // 走本机 8888 端口（比如 Charles / Fiddler）
-          return "PROXY 192.168.1.121:8989";
-        };
-
-        // 如果抓包时 HTTPS 证书不合法，可以忽略
-        client.badCertificateCallback = (cert, host, port) => true;
-
-        return client;
-      };
+      // (dio.httpClientAdapter as DefaultHttpClientAdapter).onHttpClientCreate = (client) {
+      //   client.findProxy = (uri) {
+      //     // 走本机 8888 端口（比如 Charles / Fiddler）
+      //     return "PROXY 192.168.1.112:8989";
+      //   };
+      //
+      //   // 如果抓包时 HTTPS 证书不合法，可以忽略
+      //   client.badCertificateCallback = (cert, host, port) => true;
+      //
+      //   return client;
+      // };
       _dio.interceptors.add(custom.LogInterceptor(enabled: true));
     }
   }
@@ -129,7 +132,7 @@ class HttpClient {
         }
 
         if (onSuccess != null) {
-          print("data: ${apiResponse.data},${apiResponse.code}");
+          print("data finally: ${apiResponse.message},${apiResponse.code}");
           onSuccess(apiResponse.data);
         }
         return apiResponse.data;

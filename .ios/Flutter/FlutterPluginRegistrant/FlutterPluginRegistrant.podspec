@@ -19,8 +19,12 @@ Depends on all your plugins, and provides a function to register them.
   s.static_framework    = true
   s.pod_target_xcconfig = { 'DEFINES_MODULE' => 'YES' }
   s.dependency 'Flutter'
+  s.dependency 'device_info_plus'
   s.dependency 'flutter_boost'
+  s.dependency 'image_picker_ios'
   s.dependency 'path_provider_foundation'
   s.dependency 'shared_preferences_foundation'
   s.dependency 'sqflite_darwin'
+  s.dependency 'url_launcher_ios'
+  s.dependency 'webview_flutter_wkwebview'
 end

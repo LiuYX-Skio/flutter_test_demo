@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_test_demo/navigation/core/navigator_service.dart';
+import 'package:flutter_test_demo/navigation/core/route_paths.dart';
 
 /// 用户订单视图 - 完全按照Android UserOrderView实现
 class UserOrderView extends StatelessWidget {
@@ -133,7 +135,9 @@ class UserOrderView extends StatelessWidget {
   /// 查看全部订单点击
   void _onAllOrdersTap() {
     // 跳转到订单列表页
-    print('跳转到全部订单页面');
+    NavigatorService.instance.push(RoutePaths.other.orderList, arguments: {
+      'currentPage': 0,
+    });
   }
 
   /// 订单状态点击
@@ -141,6 +145,8 @@ class UserOrderView extends StatelessWidget {
     // 根据索引跳转到对应状态的订单列表
     // index: 0-待付款, 1-待发货, 2-待收货, 3-待评价, 4-退款
     final currentPage = index + 1; // Android中使用1-based索引
-    print('跳转到订单状态页面: $currentPage');
+    NavigatorService.instance.push(RoutePaths.other.orderList, arguments: {
+      'currentPage': currentPage,
+    });
   }
 }
