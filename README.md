@@ -1,9 +1,1 @@
-请将该路径下/Users/liujian/AndroidStudioProjects/company/shop-android/module_chat的整个module代码全部转化成flutter代码,转化要求如下
-1.module_shop所有代码全部放在/Users/liujian/AndroidStudioProjects/company/flutter_test_demo/lib/app/pages/chat目录下
-2.该模块涉及到的websocket请使用最稳的websocket连接
-3.所有的网络请求都需要与原项目完全一致，包括UI样式、功能等需要完全一致，该模块所有的功能都需要完全转化，不要打乱现有的框架，根据现有的框架实现，/Users/liujian/AndroidStudioProjects/company/flutter_test_demo/lib/navigation导航框架，/Users/liujian/AndroidStudioProjects/company/flutter_test_demo/lib/network网络框架
-4.屏幕适配用现有的flutter_screenutil，请1：1完全复刻实现，禁止擅自改动没有的功能
-5.转化flutter代码过程中涉及到的所有资源文件，如图片全部从shop-android项目中复制，图片视频请根据原项目有几套，flutter也需要几套
-6.请实现代码时考虑性能，设计，架构，如果有三方控件优先使用本项目现有的控件架构，我需要转化成一个完全可上线的商业化项目
-7.写布局文件时注意xml的自定义view，需要仔细查看，有很多嵌套的自定义view，别忽略了，网络请求等逻辑要求完全一样
-8.总之需要完全复刻shop-android项目module_chat模块功能，一比一还原，不能少不能多，禁止擅自改动原项目没有的功能
+
