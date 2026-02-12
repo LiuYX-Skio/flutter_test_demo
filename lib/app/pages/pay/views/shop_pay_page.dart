@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+
 import '../../../../app/dialog/loading_manager.dart';
 import '../../../../navigation/core/navigator_service.dart';
 import '../../../../navigation/core/route_paths.dart';
+import '../../home/api/user_api.dart';
+import '../../home/models/user_models.dart';
 import '../viewmodels/shop_pay_viewmodel.dart';
 import '../widgets/alipay_hb_stage_item_widget.dart';
 
@@ -32,54 +35,62 @@ class _ShopPayPageState extends State<ShopPayPage> {
   final List<double> _stageRate = const [0.023, 0.045, 0.075];
   final bool _showAliPayHb = false;
   final bool _showWalletPay = false;
+  final ShopPayViewModel _viewModel = ShopPayViewModel();
+
   int _stagePosition = 0;
 
   @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => ShopPayViewModel(),
+    return ChangeNotifierProvider<ShopPayViewModel>.value(
+      value: _viewModel,
       child: Consumer<ShopPayViewModel>(
         builder: (_, vm, __) {
           return Scaffold(
             backgroundColor: const Color(0xFFF7F9FC),
-            body: SafeArea(
-              bottom: false,
-              child: Stack(
-                children: [
-                  Column(
+            body: Column(
+              children: [
+                Container(
+                  height: 44.h,
+                  color: Colors.white,
+                ),
+                _buildTopBar(),
+                Container(height: 8.h, color: Colors.white),
+                Expanded(
+                  child: Stack(
                     children: [
-                      _buildTopBar(),
-                      Expanded(
-                        child: SingleChildScrollView(
-                          padding: EdgeInsets.only(bottom: 84.h),
-                          child: Column(
-                            children: [
-                              SizedBox(height: 42.h),
-                              Text(
-                                '实付金额',
-                                style: TextStyle(
-                                  fontSize: 17.sp,
-                                  color: const Color(0xFF1A1A1A),
-                                ),
+                      SingleChildScrollView(
+                        padding: EdgeInsets.only(bottom: 95.h),
+                        child: Column(
+                          children: [
+                            SizedBox(height: 42.h),
+                            Text(
+                              '实付金额',
+                              style: TextStyle(
+                                fontSize: 17.sp,
+                                color: const Color(0xFF1A1A1A),
                               ),
-                              SizedBox(height: 46.h),
-                              _buildMoney(widget.payMoney),
-                              SizedBox(height: 50.h),
-                              _buildPayTypeList(vm),
-                            ],
-                          ),
+                            ),
+                            SizedBox(height: 46.h),
+                            _buildMoney(widget.payMoney),
+                            SizedBox(height: 50.h),
+                            _buildPayTypeList(vm),
+                          ],
                         ),
+                      ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: _buildBottom(vm),
                       ),
                     ],
                   ),
-                  Positioned(
-                    left: 12.w,
-                    right: 12.w,
-                    bottom: 30.h,
-                    child: _buildSubmit(vm),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           );
         },
@@ -90,27 +101,39 @@ class _ShopPayPageState extends State<ShopPayPage> {
   Widget _buildTopBar() {
     return Container(
       color: Colors.white,
-      height: 52.h,
+      height: 44.h,
       child: Stack(
-        alignment: Alignment.center,
         children: [
-          Positioned(
-            left: 5.w,
-            child: GestureDetector(
-              onTap: () => NavigatorService.instance.pop(),
-              child: Padding(
-                padding: EdgeInsets.all(10.w),
-                child: Image.asset(
-                  'assets/images/icon_back.webp',
-                  width: 12.w,
-                  height: 18.h,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              margin: EdgeInsets.only(left: 5.w),
+              child: GestureDetector(
+                onTap: () => NavigatorService.instance.pop(),
+                child: Padding(
+                  padding: EdgeInsets.all(10.w),
+                  child: Image.asset(
+                    'assets/images/icon_back.webp',
+                    width: 12.w,
+                    height: 18.h,
+                    fit: BoxFit.fill,
+                  ),
                 ),
               ),
             ),
           ),
-          Text(
-            '宝鱼商城收银台',
-            style: TextStyle(fontSize: 16.sp, color: const Color(0xFF1A1A1A)),
+          Positioned.fill(
+            child: Center(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 56.w),
+                child: Text(
+                  '宝鱼商城收银台',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 16.sp, color: const Color(0xFF1A1A1A)),
+                ),
+              ),
+            ),
           ),
         ],
       ),
@@ -125,12 +148,15 @@ class _ShopPayPageState extends State<ShopPayPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Text(
-          '￥',
-          style: TextStyle(
-            fontSize: 30.sp,
-            color: const Color(0xFF1A1A1A),
-            fontWeight: FontWeight.bold,
+        Padding(
+          padding: EdgeInsets.only(bottom: 2.h),
+          child: Text(
+            '￥',
+            style: TextStyle(
+              fontSize: 30.sp,
+              color: const Color(0xFF1A1A1A),
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         Text(
@@ -155,6 +181,7 @@ class _ShopPayPageState extends State<ShopPayPage> {
 
   Widget _buildPayTypeList(ShopPayViewModel vm) {
     final showRecall = widget.viewType == ShopPayViewModel.viewTypeRecallPay;
+    final amount = double.tryParse(widget.payMoney ?? '0') ?? 0.0;
     return Column(
       children: [
         _payTypeItem(
@@ -163,6 +190,7 @@ class _ShopPayPageState extends State<ShopPayPage> {
           selected: vm.payType == ShopPayViewModel.payTypeWx,
           onTap: () => vm.updatePayType(ShopPayViewModel.payTypeWx),
         ),
+        _buildSectionLine(),
         if (!showRecall && _showAliPayHb) ...[
           _payTypeItem(
             icon: 'assets/images/icon_alipay.webp',
@@ -171,9 +199,9 @@ class _ShopPayPageState extends State<ShopPayPage> {
             label: '分期付 更轻松',
             onTap: () => vm.updatePayType(ShopPayViewModel.payTypeAliPayHb),
           ),
-          if (vm.payType == ShopPayViewModel.payTypeAliPayHb)
+          _buildSectionLine(),
+          if (vm.payType == ShopPayViewModel.payTypeAliPayHb) ...[
             ...List.generate(_stageNum.length, (index) {
-              final amount = double.tryParse(widget.payMoney ?? '0') ?? 0.0;
               return AlipayHbStageItemWidget(
                 selected: _stagePosition == index,
                 stageNum: _stageNum[index],
@@ -183,7 +211,9 @@ class _ShopPayPageState extends State<ShopPayPage> {
                 onTap: () => setState(() => _stagePosition = index),
               );
             }),
+          ],
         ],
+        _buildSectionLine(),
         _payTypeItem(
           icon: 'assets/images/icon_alipay.webp',
           title: '支付宝支付',
@@ -191,13 +221,7 @@ class _ShopPayPageState extends State<ShopPayPage> {
           onTap: () => vm.updatePayType(ShopPayViewModel.payTypeAliPay),
         ),
         if (!showRecall) ...[
-          if (_showWalletPay)
-            _payTypeItem(
-              icon: 'assets/images/app_logo.webp',
-              title: '零钱支付',
-              selected: vm.payType == ShopPayViewModel.payTypeBalance,
-              onTap: () => vm.updatePayType(ShopPayViewModel.payTypeBalance),
-            ),
+          _buildSectionLine(),
           _payTypeItem(
             icon: 'assets/images/app_logo.webp',
             title: widget.hasMonthCredit ? '月付支付' : '月付支付(部分商品不支持月付)',
@@ -205,8 +229,24 @@ class _ShopPayPageState extends State<ShopPayPage> {
             enabled: widget.hasMonthCredit,
             onTap: () => vm.updatePayType(ShopPayViewModel.payTypeMonthPay),
           ),
+          _buildSectionLine(),
+          if (_showWalletPay)
+            _payTypeItem(
+              icon: 'assets/images/app_logo.webp',
+              title: '零钱支付',
+              selected: vm.payType == ShopPayViewModel.payTypeBalance,
+              onTap: () => vm.updatePayType(ShopPayViewModel.payTypeBalance),
+            ),
         ],
       ],
+    );
+  }
+
+  Widget _buildSectionLine() {
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 12.w),
+      height: 1.h,
+      color: const Color(0xFFEDEDED),
     );
   }
 
@@ -236,8 +276,10 @@ class _ShopPayPageState extends State<ShopPayPage> {
               SizedBox(width: 14.w),
               Text(
                 title,
-                style:
-                    TextStyle(fontSize: 14.sp, color: const Color(0xFF1A1A1A)),
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF1A1A1A),
+                ),
               ),
               if ((label ?? '').isNotEmpty) ...[
                 SizedBox(width: 6.w),
@@ -245,24 +287,19 @@ class _ShopPayPageState extends State<ShopPayPage> {
                   padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(2.r),
-                    border:
-                        Border.all(color: const Color(0xFFFF3530), width: 1.w),
+                    border: Border.all(color: const Color(0xFFFF3530), width: 1.w),
                   ),
                   child: Text(
                     label!,
                     style: TextStyle(
-                        fontSize: 10.sp, color: const Color(0xFFFF3530)),
+                      fontSize: 10.sp,
+                      color: const Color(0xFFFF3530),
+                    ),
                   ),
                 ),
               ],
               const Spacer(),
-              Image.asset(
-                selected
-                    ? 'assets/images/icon_pay_select.webp'
-                    : 'assets/images/ic_un_select.png',
-                width: 20.w,
-                height: 20.w,
-              ),
+              _buildSelectView(selected),
             ],
           ),
         ),
@@ -270,26 +307,77 @@ class _ShopPayPageState extends State<ShopPayPage> {
     );
   }
 
-  Widget _buildSubmit(ShopPayViewModel vm) {
-    final money = widget.payMoney ?? '0.00';
-    return GestureDetector(
-      onTap: vm.isPaying ? null : () => _submit(vm),
-      child: Container(
-        height: 44.h,
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: const Color(0xFFFF3530),
-          borderRadius: BorderRadius.circular(22.r),
-        ),
-        child: Text(
-          '立即支付 ￥$money',
-          style: TextStyle(
-            fontSize: 16.sp,
-            color: Colors.white,
-          ),
+  Widget _buildSelectView(bool selected) {
+    if (selected) {
+      return Image.asset(
+        'assets/images/icon_pay_select.webp',
+        width: 20.w,
+        height: 20.w,
+      );
+    }
+    return Container(
+      width: 20.w,
+      height: 20.w,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        border: Border.all(
+          color: const Color(0xFF909090),
+          width: 1.w,
         ),
       ),
     );
+  }
+
+  Widget _buildBottom(ShopPayViewModel vm) {
+    return Container(
+      color: Colors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(height: 1.h, color: const Color(0xFFCCCCCC)),
+          GestureDetector(
+            onTap: vm.isPaying ? null : () => _submit(vm),
+            child: Container(
+              margin: EdgeInsets.fromLTRB(12.w, 10.h, 12.w, 30.h),
+              height: 44.h,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF3530),
+                borderRadius: BorderRadius.circular(22.r),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '立即支付 ￥',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    _submitMoneyText(widget.payMoney),
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _submitMoneyText(String? money) {
+    final value = double.tryParse(money ?? '0') ?? 0.0;
+    if (value == value.truncateToDouble()) {
+      return value.toInt().toString();
+    }
+    return value.toStringAsFixed(2);
   }
 
   Future<void> _submit(ShopPayViewModel vm) async {
@@ -309,31 +397,41 @@ class _ShopPayPageState extends State<ShopPayPage> {
         await vm.userCreditDetail();
         final detail = vm.userCreditEntity;
         if (detail?.hasApply == true) {
-          if (detail?.status == 1) {
+          if (detail?.status == 2) {
+          } else if (detail?.status == 1) {
             NavigatorService.instance.push(RoutePaths.other.examineIng);
             return;
-          }
-          if (detail?.status == 3) {
+          } else if (detail?.status == 3) {
             NavigatorService.instance.push(
               RoutePaths.other.examineFail,
               arguments: {'nextApplyTIme': detail?.nextApplyTime},
             );
             return;
-          }
-          if (detail?.status != 2) {
-            NavigatorService.instance
-                .push(RoutePaths.other.applyQuota, arguments: {
-              'hasApply': true,
-              'isNeedClose': true,
-            });
+          } else {
+            final hasAuth = await _hasAuthentication();
+            if (hasAuth) {
+              NavigatorService.instance.push(RoutePaths.other.supplementMessage);
+            } else {
+              NavigatorService.instance.push(
+                RoutePaths.other.applyQuota,
+                arguments: {
+                  'hasApply': true,
+                  'isNeedClose': true,
+                  'showBackButton': true,
+                },
+              );
+            }
             return;
           }
         } else {
-          NavigatorService.instance
-              .push(RoutePaths.other.applyQuota, arguments: {
-            'hasApply': false,
-            'isNeedClose': true,
-          });
+          NavigatorService.instance.push(
+            RoutePaths.other.applyQuota,
+            arguments: {
+              'hasApply': false,
+              'isNeedClose': true,
+              'showBackButton': true,
+            },
+          );
           return;
         }
       }
@@ -366,5 +464,15 @@ class _ShopPayPageState extends State<ShopPayPage> {
     if (msg.contains('SDK尚未接入')) {
       LoadingManager.instance.showToast('支付请求已发起，待支付SDK接入后可完成支付');
     }
+  }
+
+  Future<bool> _hasAuthentication() async {
+    UserInfoEntity? userInfo;
+    await UserApi.getUserInfo(
+      onSuccess: (data) {
+        userInfo = data;
+      },
+    );
+    return userInfo?.hasAuthentication == true;
   }
 }

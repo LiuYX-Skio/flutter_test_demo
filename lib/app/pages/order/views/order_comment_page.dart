@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -184,11 +185,16 @@ class _OrderCommentPageState extends State<OrderCommentPage> {
                     height: 40.w,
                     color: const Color(0xFFCCCCCC),
                   )
-                : Image.network(
-                    widget.imageUrl!,
+                : CachedNetworkImage(
+                    imageUrl: widget.imageUrl!,
                     width: 40.w,
                     height: 40.w,
                     fit: BoxFit.cover,
+                    errorWidget: (_, __, ___) => Container(
+                      width: 40.w,
+                      height: 40.w,
+                      color: const Color(0xFFCCCCCC),
+                    ),
                   ),
           ),
           SizedBox(width: 15.w),

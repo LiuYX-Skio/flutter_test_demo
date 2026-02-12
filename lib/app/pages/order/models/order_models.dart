@@ -31,19 +31,27 @@ class OrderOutEntity {
 
 @JsonSerializable()
 class OrderListEntity {
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? createTime;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? deliveryId;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? deliveryName;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? deliveryType;
   @JsonKey(fromJson: AppDataUtils.toInt)
   final int? id;
   @JsonKey(fromJson: AppDataUtils.toInt)
   final int? offlinePayStatus;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? orderId;
   @JsonKey(fromJson: AppDataUtils.toBool)
   final bool? paid;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? payPostage;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? payPrice;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? payTime;
   @JsonKey(fromJson: AppDataUtils.toInt)
   final int? refundStatus;
@@ -95,8 +103,11 @@ class OrderListEntity {
 class CartInfoEntity {
   @JsonKey(fromJson: AppDataUtils.toInt)
   final int? id;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? orderId;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? productId;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? unique;
   final CartDetailInfoEntity? info;
 
@@ -120,21 +131,31 @@ class CartDetailInfoEntity {
   final int? attrValueId;
   @JsonKey(fromJson: AppDataUtils.toInt)
   final int? giveIntegral;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? image;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? isReply;
   @JsonKey(fromJson: AppDataUtils.toBool)
   final bool? isSub;
   @JsonKey(fromJson: AppDataUtils.toInt)
   final int? payNum;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? price;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? productId;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? productName;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? productType;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? sku;
   @JsonKey(fromJson: AppDataUtils.toInt)
   final int? tempId;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? vipPrice;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? volume;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? weight;
 
   CartDetailInfoEntity({
@@ -163,15 +184,21 @@ class CartDetailInfoEntity {
 
 @JsonSerializable()
 class OrderInfoListEntity {
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? attrId;
   @JsonKey(fromJson: AppDataUtils.toInt)
   final int? cartNum;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? image;
   @JsonKey(fromJson: AppDataUtils.toInt)
   final int? isReply;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? price;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? productId;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? sku;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? storeName;
   @JsonKey(fromJson: AppDataUtils.toBool)
   final bool? hasCallback;
@@ -419,22 +446,35 @@ class OrderDetailEntity {
 
 @JsonSerializable()
 class ConfigOrderInfoEntity {
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? attrValueId;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? giveIntegral;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? image;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? isReply;
   @JsonKey(fromJson: AppDataUtils.toBool)
   final bool? isSub;
   @JsonKey(fromJson: AppDataUtils.toInt)
   int? payNum;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? price;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? productId;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? productName;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? productType;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? sku;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? tempId;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? vipPrice;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? volume;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? weight;
   @JsonKey(fromJson: AppDataUtils.toBool)
   final bool? hasCallback;
@@ -469,22 +509,38 @@ class ConfigOrderInfoEntity {
 
 @JsonSerializable()
 class ConfigOrderInfoOutEntity {
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? addressId;
   final List<String>? cartIdList;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? city;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? couponFee;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? detail;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? district;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? freightFee;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? orderProNum;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? payFee;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? phone;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? proTotalFee;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? province;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? realName;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? remark;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? userBalance;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? userCouponId;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? userIntegral;
   @JsonKey(fromJson: AppDataUtils.toBool)
   final bool? hasMonthCredit;
@@ -520,9 +576,13 @@ class ConfigOrderInfoOutEntity {
 
 @JsonSerializable()
 class ConfigOrderOutEntity {
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? aliPayStatus;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? payWeixinOpen;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? preOrderNo;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? yuePayStatus;
   final ConfigOrderInfoOutEntity? orderInfoVo;
 
@@ -542,13 +602,21 @@ class ConfigOrderOutEntity {
 
 @JsonSerializable()
 class ConfigOrderPriceEntity {
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? couponFee;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? deductionPrice;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? freightFee;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? payFee;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? proTotalFee;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? surplusIntegral;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? useIntegral;
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? usedIntegral;
 
   ConfigOrderPriceEntity({

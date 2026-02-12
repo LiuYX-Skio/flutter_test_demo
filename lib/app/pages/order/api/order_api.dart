@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import '../../../../network/network.dart';
 import '../../home/models/product_models.dart';
 import '../../home/models/user_models.dart';
@@ -173,9 +172,9 @@ class OrderApi {
   }) {
     return HttpClient.instance.post<String>(
       '/api/app/cart/num',
-      data: {
+      queryParameters: {
         'id': id,
-        'number': number,
+        'number': number.toString(),
       },
       onSuccess: onSuccess,
       onError: onError,

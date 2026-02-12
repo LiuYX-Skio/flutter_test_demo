@@ -6,7 +6,7 @@ import '../../../../app/dialog/loading_manager.dart';
 import '../../../../navigation/core/navigator_service.dart';
 import '../../../../navigation/core/route_paths.dart';
 import '../../home/models/product_models.dart';
-import '../../home/widgets/mine/shop_recommend_view.dart';
+import '../../../widgets/shop_recommend_view.dart';
 import '../../mine/models/address_models.dart';
 import '../api/shop_detail_api.dart';
 import '../models/shop_models.dart';
@@ -86,7 +86,13 @@ class _ShopCarPageState extends State<ShopCarPage> {
                               ),
                             ),
                             if (_recommendList.isNotEmpty)
-                              ShopRecommendView(products: _recommendList),
+                              Container(
+                                margin: EdgeInsets.only(top: 20.h),
+                                child: ShopRecommendView(
+                                  products: _recommendList,
+                                  onItemTap: (_) => NavigatorService.instance.pop(),
+                                ),
+                              ),
                           ],
                         ),
                       ),
@@ -110,17 +116,29 @@ class _ShopCarPageState extends State<ShopCarPage> {
       height: 54.h,
       child: Row(
         children: [
-          SizedBox(width: 11.w),
           GestureDetector(
             onTap: () => NavigatorService.instance.pop(),
-            child: Image.asset('assets/images/icon_back.webp', width: 11.w, height: 18.h),
-          ),
-          SizedBox(width: 16.w),
-          Text(
-            '购物车',
-            style: TextStyle(
-              fontSize: 18.sp,
-              color: const Color(0xFF333333),
+            child: Container(
+              height: 54.h,
+              padding: EdgeInsets.only(left: 11.w),
+              child: Row(
+                children: [
+                  Image.asset(
+                    'assets/images/icon_back.webp',
+                    width: 11.w,
+                    height: 18.h,
+                    fit: BoxFit.fill,
+                  ),
+                  SizedBox(width: 16.w),
+                  Text(
+                    '购物车',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      color: const Color(0xFF333333),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           SizedBox(width: 12.w),
@@ -210,14 +228,17 @@ class _ShopCarPageState extends State<ShopCarPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    item.storeName ?? '',
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: const Color(0xFF1A1A1A),
-                      fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: EdgeInsets.only(right: 25.w),
+                    child: Text(
+                      item.storeName ?? '',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        color: const Color(0xFF1A1A1A),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -293,22 +314,19 @@ class _ShopCarPageState extends State<ShopCarPage> {
   }
 
   Widget _buildCountButton(String text, VoidCallback onTap) {
+    final bool isAdd = text == '+';
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 25.w,
         height: 25.w,
         alignment: Alignment.center,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(4.r),
-          border: Border.all(color: const Color(0xFFE0E0E0)),
-          color: Colors.white,
-        ),
+        color: isAdd ? const Color(0xFFEDF0F2) : const Color(0xFFF0F1F2),
         child: Text(
           text,
           style: TextStyle(
             fontSize: 18.sp,
-            color: const Color(0xFF9B9C9E),
+            color: isAdd ? const Color(0xFF313234) : const Color(0xFF9B9C9E),
           ),
         ),
       ),
@@ -331,7 +349,12 @@ class _ShopCarPageState extends State<ShopCarPage> {
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => vm.toggleSelectAll(!vm.isSelectAll),
+            onTap: () {
+              final ok = vm.toggleSelectAll(!vm.isSelectAll);
+              if (!ok) {
+                LoadingManager.instance.showToast('只能选择同类型的可回收商品');
+              }
+            },
             child: Image.asset(
               vm.isSelectAll ? 'assets/images/ic_select.png' : 'assets/images/ic_un_select.png',
               width: 17.w,
@@ -346,20 +369,53 @@ class _ShopCarPageState extends State<ShopCarPage> {
               color: const Color(0xFF999999),
             ),
           ),
-          const Spacer(),
-          Text(
-            '合计',
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: const Color(0xFF1A1A1A),
-            ),
-          ),
-          Text(
-            '￥${vm.selectedTotal.toStringAsFixed(2)}',
-            style: TextStyle(
-              fontSize: 19.sp,
-              color: const Color(0xFFFF3530),
-              fontWeight: FontWeight.bold,
+          SizedBox(width: 8.w),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  '合计',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: const Color(0xFF1A1A1A),
+                  ),
+                ),
+                Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      '￥${vm.selectedTotal.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 19.sp,
+                        color: const Color(0xFFFF3530),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 6.w),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '明细',
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        color: const Color(0xFFFF3530),
+                      ),
+                    ),
+                    SizedBox(width: 6.5.w),
+                    Image.asset(
+                      'assets/images/icon_up_arrow.webp',
+                      width: 8.5.w,
+                      height: 5.5.h,
+                      fit: BoxFit.fill,
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
           SizedBox(width: 12.w),

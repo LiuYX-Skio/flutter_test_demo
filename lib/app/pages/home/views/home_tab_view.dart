@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_test_demo/app/widgets/error_widget.dart';
 import 'package:flutter_test_demo/app/widgets/loading_widget.dart';
 import 'package:flutter_test_demo/app/widgets/refresh_list_widget.dart';
@@ -102,14 +103,22 @@ class _HomeTabViewState extends State<HomeTabView>
 
   /// 构建首页头部（包含搜索框、Banner、分类菜单）
   Widget _buildHomeHeader(HomeViewModel viewModel) {
+    final hasBanner = viewModel.homeData?.banner != null &&
+        viewModel.homeData!.banner!.isNotEmpty;
+    final hasMenu = viewModel.homeData?.menuCategoryList != null &&
+        viewModel.homeData!.menuCategoryList!.isNotEmpty;
+    final hasHeaderData = viewModel.homeData != null && (hasBanner || hasMenu);
+
     return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(6.r),
-          bottomRight: Radius.circular(6.r),
-        ),
-      ),
+      decoration: hasHeaderData
+          ? BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(6.r),
+                bottomRight: Radius.circular(6.r),
+              ),
+            )
+          : null,
       child: Stack(
         children: [
           // 顶部渐变背景 (203dp高度)
@@ -126,36 +135,40 @@ class _HomeTabViewState extends State<HomeTabView>
 
           Column(
             children: [
-              // 搜索框和消息图标 (marginTop: 46dp)
               Container(
                 margin: EdgeInsets.only(left: 12.w, top: 46.h, right: 12.w),
                 child: Row(
                   children: [
                     // 搜索框
                     Expanded(
-                      child: Container(
-                        height: 34.h,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(17.r),
-                        ),
-                        child: Row(
-                          children: [
-                            SizedBox(width: 12.w),
-                            Image.asset(
-                              'assets/images/home_search.png',
-                              width: 16.w,
-                              height: 16.w,
-                            ),
-                            SizedBox(width: 8.w),
-                            Text(
-                              '搜索商品',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                color: const Color(0xFF999999),
+                      child: GestureDetector(
+                        onTap: () {
+                          NavigatorService.instance.push(RoutePaths.product.search);
+                        },
+                        child: Container(
+                          height: 34.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(17.r),
+                          ),
+                          child: Row(
+                            children: [
+                              SizedBox(width: 12.w),
+                              Image.asset(
+                                'assets/images/home_search.png',
+                                width: 16.w,
+                                height: 16.w,
                               ),
-                            ),
-                          ],
+                              SizedBox(width: 8.w),
+                              Text(
+                                '搜索商品',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: const Color(0xFF999999),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -171,8 +184,7 @@ class _HomeTabViewState extends State<HomeTabView>
               ),
 
               // Banner (marginTop: 16dp, height: 140dp)
-              if (viewModel.homeData?.banner != null &&
-                  viewModel.homeData!.banner!.isNotEmpty)
+              if (hasBanner)
                 Container(
                   margin: EdgeInsets.only(left: 12.w, top: 16.h, right: 12.w),
                   height: 140.h,
@@ -184,20 +196,29 @@ class _HomeTabViewState extends State<HomeTabView>
                   ),
                 ),
 
-              // 分类菜单 (marginTop: 20dp)
-              if (viewModel.homeData?.menuCategoryList != null &&
-                  viewModel.homeData!.menuCategoryList!.isNotEmpty)
+              if (hasMenu)
                 Container(
                   margin: EdgeInsets.only(top: 20.h),
                   child: MenuGridWidget(
                     menus: viewModel.homeData!.menuCategoryList!,
                     onTap: (menu) {
-                      print('点击菜单: ${menu.name}');
+                      final sortId = menu.id.toString();
+                      if (sortId.isEmpty) {
+                        return;
+                      }
+                      NavigatorService.instance.push(
+                        RoutePaths.product.sort,
+                        arguments: {'sortId': sortId},
+                      );
                     },
                   ),
                 ),
 
-              SizedBox(height: 12.h),
+              if (hasHeaderData)
+                Container(
+                  height: 11.h,
+                  color: const Color(0xFFF7F9FC),
+                ),
             ],
           ),
         ],
@@ -230,19 +251,23 @@ class _HomeTabViewState extends State<HomeTabView>
                 topLeft: Radius.circular(6.r),
                 topRight: Radius.circular(6.r),
               ),
-              child: Image.network(
-                product.imageUrl ?? '',
-                width: double.infinity,
-                height: 170.h,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: double.infinity,
-                    height: 170.h,
-                    color: const Color(0xFFCCCCCC),
-                  );
-                },
-              ),
+              child: (product.imageUrl ?? '').isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: product.imageUrl!,
+                      width: double.infinity,
+                      height: 170.h,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => Container(
+                        width: double.infinity,
+                        height: 170.h,
+                        color: const Color(0xFFCCCCCC),
+                      ),
+                    )
+                  : Container(
+                      width: double.infinity,
+                      height: 170.h,
+                      color: const Color(0xFFCCCCCC),
+                    ),
             ),
 
             // 商品标题

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../dialog/loading_manager.dart';
 import 'viewmodels/main_viewmodel.dart';
 import 'views/home_tab_view.dart';
 import 'views/sort_tab_view.dart';
@@ -19,6 +21,7 @@ class HomePage extends StatefulWidget {
 class _MainPageState extends State<HomePage> with WidgetsBindingObserver {
   late PageController _pageController;
   late MainViewModel _mainViewModel;
+  DateTime? _lastBackPressTime;
 
   @override
   void initState() {
@@ -51,101 +54,117 @@ class _MainPageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        physics: const NeverScrollableScrollPhysics(), // 禁用滑动
-        children: const [
-          HomeTabView(),
-          SortTabView(),
-          ApplyQuotaTabView(),
-          MineTabView(),
-        ],
-      ),
-      bottomNavigationBar: Consumer<MainViewModel>(
-        builder: (context, viewModel, child) {
-          return Container(
-            height: 70.h, // Android中是62dp
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0x1A000000),
-                  blurRadius: 8,
-                  offset: Offset(0, -2),
-                ),
-              ],
-            ),
-            child: BottomNavigationBar(
-              currentIndex: viewModel.currentTabIndex,
-              onTap: (index) {
-                viewModel.changeTab(index);
-                _pageController.jumpToPage(index);
-              },
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.white,
-              selectedItemColor: const Color(0xFFFF3530), // 主题色
-              unselectedItemColor: const Color(0xFF999999),
-              selectedFontSize: 12.sp,
-              unselectedFontSize: 12.sp,
-              elevation: 0, // 移除默认阴影，使用自定义阴影
-              items: [
-              BottomNavigationBarItem(
-                icon: Image.asset(
-                  'assets/images/ic_menu_tab1.png',
-                  width: 24.w,
-                  height: 24.w,
-                ),
-                activeIcon: Image.asset(
-                  'assets/images/ic_menu_tab1_p.png',
-                  width: 24.w,
-                  height: 24.w,
-                ),
-                label: '首页',
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          return;
+        }
+        final now = DateTime.now();
+        if (_lastBackPressTime == null ||
+            now.difference(_lastBackPressTime!) > const Duration(seconds: 2)) {
+          _lastBackPressTime = now;
+          LoadingManager.instance.showToast('再按一次退出应用');
+          return;
+        }
+        SystemNavigator.pop();
+      },
+      child: Scaffold(
+        body: PageView(
+          controller: _pageController,
+          physics: const NeverScrollableScrollPhysics(), // 禁用滑动
+          children: const [
+            HomeTabView(),
+            SortTabView(),
+            ApplyQuotaTabView(),
+            MineTabView(),
+          ],
+        ),
+        bottomNavigationBar: Consumer<MainViewModel>(
+          builder: (context, viewModel, child) {
+            return Container(
+              height: 78.w,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                boxShadow: [
+                  BoxShadow(
+                    color: Color(0x1A000000),
+                    blurRadius: 8,
+                    offset: Offset(0, -2),
+                  ),
+                ],
               ),
-              BottomNavigationBarItem(
-                icon: Image.asset(
-                  'assets/images/ic_menu_tab2.png',
-                  width: 24.w,
-                  height: 24.w,
-                ),
-                activeIcon: Image.asset(
-                  'assets/images/ic_menu_tab2_p.png',
-                  width: 24.w,
-                  height: 24.w,
-                ),
-                label: '排行榜',
+              child: BottomNavigationBar(
+                currentIndex: viewModel.currentTabIndex,
+                onTap: (index) {
+                  viewModel.changeTab(index);
+                  _pageController.jumpToPage(index);
+                },
+                type: BottomNavigationBarType.fixed,
+                backgroundColor: Colors.white,
+                selectedItemColor: const Color(0xFFFF3530), // 主题色
+                unselectedItemColor: const Color(0xFF999999),
+                selectedFontSize: 12.sp,
+                unselectedFontSize: 12.sp,
+                elevation: 0, // 移除默认阴影，使用自定义阴影
+                items: [
+                  BottomNavigationBarItem(
+                    icon: Image.asset(
+                      'assets/images/ic_menu_tab1.png',
+                      width: 24.w,
+                      height: 24.w,
+                    ),
+                    activeIcon: Image.asset(
+                      'assets/images/ic_menu_tab1_p.png',
+                      width: 24.w,
+                      height: 24.w,
+                    ),
+                    label: '首页',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Image.asset(
+                      'assets/images/ic_menu_tab2.png',
+                      width: 24.w,
+                      height: 24.w,
+                    ),
+                    activeIcon: Image.asset(
+                      'assets/images/ic_menu_tab2_p.png',
+                      width: 24.w,
+                      height: 24.w,
+                    ),
+                    label: '排行榜',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Image.asset(
+                      'assets/images/ic_menu_tab3.png',
+                      width: 24.w,
+                      height: 24.w,
+                    ),
+                    activeIcon: Image.asset(
+                      'assets/images/ic_menu_tab3_p.png',
+                      width: 24.w,
+                      height: 24.w,
+                    ),
+                    label: '月付申请',
+                  ),
+                  BottomNavigationBarItem(
+                    icon: Image.asset(
+                      'assets/images/ic_menu_tab4.png',
+                      width: 24.w,
+                      height: 24.w,
+                    ),
+                    activeIcon: Image.asset(
+                      'assets/images/ic_menu_tab4_p.png',
+                      width: 24.w,
+                      height: 24.w,
+                    ),
+                    label: '我的',
+                  ),
+                ],
               ),
-              BottomNavigationBarItem(
-                icon: Image.asset(
-                  'assets/images/ic_menu_tab3.png',
-                  width: 24.w,
-                  height: 24.w,
-                ),
-                activeIcon: Image.asset(
-                  'assets/images/ic_menu_tab3_p.png',
-                  width: 24.w,
-                  height: 24.w,
-                ),
-                label: '月付申请',
-              ),
-              BottomNavigationBarItem(
-                icon: Image.asset(
-                  'assets/images/ic_menu_tab4.png',
-                  width: 24.w,
-                  height: 24.w,
-                ),
-                activeIcon: Image.asset(
-                  'assets/images/ic_menu_tab4_p.png',
-                  width: 24.w,
-                  height: 24.w,
-                ),
-                label: '我的',
-              ),
-            ],
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

@@ -10,10 +10,10 @@ class BannerWidget extends StatefulWidget {
   final Function(BannerEntity)? onTap;
 
   const BannerWidget({
-    Key? key,
+    super.key,
     required this.banners,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<BannerWidget> createState() => _BannerWidgetState();

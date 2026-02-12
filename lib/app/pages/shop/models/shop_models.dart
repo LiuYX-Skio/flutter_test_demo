@@ -113,6 +113,7 @@ class ShopCarEntity {
   @JsonKey(defaultValue: false)
   final bool isSelect;
 
+  @JsonKey(fromJson: AppDataUtils.toStringValue)
   final String? attrId;
 
   @JsonKey(fromJson: AppDataUtils.toBool, defaultValue: false)
@@ -243,4 +244,3 @@ class ShopAddCarEntity {
 
   Map<String, dynamic> toJson() => _$ShopAddCarEntityToJson(this);
 }
-

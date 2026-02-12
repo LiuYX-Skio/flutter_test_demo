@@ -67,8 +67,6 @@ MenuCategoryEntity _$MenuCategoryEntityFromJson(Map<String, dynamic> json) =>
       id: AppDataUtils.toInt(json['id']),
       name: json['name'] as String?,
       iconUrl: json['url'] as String?,
-      sort: AppDataUtils.toInt(json['sort']),
-      show: AppDataUtils.toInt(json['show']),
     );
 
 Map<String, dynamic> _$MenuCategoryEntityToJson(MenuCategoryEntity instance) =>
@@ -76,6 +74,4 @@ Map<String, dynamic> _$MenuCategoryEntityToJson(MenuCategoryEntity instance) =>
       'id': instance.id,
       'name': instance.name,
       'url': instance.iconUrl,
-      'sort': instance.sort,
-      'show': instance.show,
     };

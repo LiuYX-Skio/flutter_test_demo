@@ -9,10 +9,10 @@ class RankingListWidget extends StatelessWidget {
   final Function(ProductEntity)? onTap;
 
   const RankingListWidget({
-    Key? key,
+    super.key,
     required this.products,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -39,11 +39,11 @@ class _RankingItem extends StatelessWidget {
   final VoidCallback? onTap;
 
   const _RankingItem({
-    Key? key,
+    super.key,
     required this.product,
     required this.rank,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

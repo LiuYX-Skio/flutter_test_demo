@@ -1,13 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
 import '../../../../app/constants/app_constants.dart';
 import '../../../../app/dialog/loading_manager.dart';
 import '../../../../app/provider/user_provider.dart';
 import '../../../../navigation/core/navigator_service.dart';
 import '../../../../navigation/core/route_paths.dart';
-import '../../home/viewmodels/mine_viewmodel.dart';
+import '../../home/api/user_api.dart';
 
 class AccountSafeDetailPage extends StatefulWidget {
   const AccountSafeDetailPage({super.key});
@@ -260,10 +259,15 @@ class _AccountSafeDetailPageState extends State<AccountSafeDetailPage> {
       context.nav.push(RoutePaths.auth.login);
       return;
     }
-    final viewModel = Provider.of<MineViewModel>(context, listen: false);
-    viewModel.cancelAccount(onSuccess: () {
-      context.nav.push(RoutePaths.auth.login);
-      Navigator.of(context).pop();
-    });
+    UserApi.cancelAccount(
+      onSuccess: (_) async {
+        await UserProvider.clearUserInfo();
+        if (!mounted) {
+          return;
+        }
+        Navigator.of(context).pop();
+        context.nav.push(RoutePaths.auth.login);
+      },
+    );
   }
 }

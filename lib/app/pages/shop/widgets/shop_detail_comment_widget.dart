@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/shop_detail_models.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
@@ -24,50 +25,71 @@ class ShopDetailCommentWidget extends StatelessWidget {
     }
 
     final firstComment = commentData!.list!.first;
+    final ShopCommentEntity? secondComment =
+        commentData!.list!.length > 1 ? commentData!.list![1] : null;
 
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.all(13),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 标题栏
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                '商品评价',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Color(0xFF1A1A1A),
-                  fontWeight: FontWeight.w500,
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12.w),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  '商品评价',
+                  style: TextStyle(
+                    fontSize: 15.sp,
+                    color: const Color(0xFF1A1A1A),
+                  ),
                 ),
-              ),
-              GestureDetector(
-                onTap: onViewAllTap,
-                child: Row(
-                  children: [
-                    Text(
-                      '查看全部(${commentData!.total ?? 0})',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF999999),
+                Text(
+                  '（${commentData!.total ?? 0}）',
+                  style: TextStyle(
+                    fontSize: 16.sp,
+                    color: const Color(0xFF666666),
+                  ),
+                ),
+                const Spacer(),
+                GestureDetector(
+                  onTap: onViewAllTap,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        '查看全部',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: const Color(0xFF999999),
+                        ),
                       ),
-                    ),
-                    const Icon(
-                      Icons.arrow_forward_ios,
-                      size: 12,
-                      color: Color(0xFF999999),
-                    ),
-                  ],
+                      SizedBox(width: 10.w),
+                      Image.asset(
+                        'assets/images/icon_detail_arrow.png',
+                        width: 8.w,
+                        height: 12.h,
+                        fit: BoxFit.fill,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
 
           // 评论内容
-          _buildCommentItem(firstComment),
+          Padding(
+            padding: EdgeInsets.only(top: 20.h, left: 12.w, right: 12.w),
+            child: _buildCommentItem(firstComment),
+          ),
+          if (secondComment != null)
+            Padding(
+              padding: EdgeInsets.only(top: 20.h, left: 12.w, right: 12.w),
+              child: _buildCommentItem(secondComment),
+            ),
         ],
       ),
     );
@@ -81,81 +103,73 @@ class ShopDetailCommentWidget extends StatelessWidget {
         // 用户信息
         Row(
           children: [
-            // 用户头像
             ClipOval(
               child: CachedNetworkImage(
                 imageUrl: comment.avatar ?? '',
-                width: 36,
-                height: 36,
+                width: 33.w,
+                height: 33.w,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
-                  width: 36,
-                  height: 36,
+                  width: 33.w,
+                  height: 33.w,
                   color: Colors.grey[300],
                 ),
                 errorWidget: (context, url, error) => Container(
-                  width: 36,
-                  height: 36,
+                  width: 33.w,
+                  height: 33.w,
                   color: Colors.grey[300],
                   child: const Icon(Icons.person, color: Colors.white),
                 ),
               ),
             ),
-            const SizedBox(width: 10),
-
-            // 用户名和评分
+            SizedBox(width: 11.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    comment.nickname ?? '匿名用户',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF333333),
-                      fontWeight: FontWeight.w500,
+                    '${comment.nickname ?? ''}  ${comment.createTime ?? ''}',
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: Colors.black,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 6.h),
                   _buildStarRating(comment.score ?? 5),
                 ],
               ),
             ),
-
-            // 评论时间
-            Text(
-              comment.createTime ?? '',
-              style: const TextStyle(
-                fontSize: 12,
-                color: Color(0xFF999999),
-              ),
-            ),
           ],
         ),
-        const SizedBox(height: 12),
-
-        // 评论内容
-        Text(
-          comment.comment ?? '',
-          style: const TextStyle(
-            fontSize: 14,
-            color: Color(0xFF666666),
+        if ((comment.comment ?? '').isNotEmpty)
+          Padding(
+            padding: EdgeInsets.only(top: 12.h),
+            child: Text(
+              comment.comment ?? '',
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: const Color(0xFF1A1A1A),
+              ),
+            ),
           ),
-          maxLines: 3,
-          overflow: TextOverflow.ellipsis,
-        ),
       ],
     );
   }
 
   /// 构建星级评分
   Widget _buildStarRating(int score) {
+    final int normalizedScore = score > 5 ? 5 : score;
     return Row(
       children: List.generate(5, (index) {
-        return Icon(
-          index < score ? Icons.star : Icons.star_border,
-          size: 14,
-          color: const Color(0xFFFFB800),
+        return Padding(
+          padding: EdgeInsets.only(left: index == 0 ? 0 : 4.5.w),
+          child: Image.asset(
+            index < normalizedScore
+                ? 'assets/images/shop_star.png'
+                : 'assets/images/shop_un_star.png',
+            width: 10.w,
+            height: 10.h,
+          ),
         );
       }),
     );

@@ -67,7 +67,7 @@ class ShopSortViewModel extends ChangeNotifier {
     final cid = _selectedCategoryId;
     if ((cid ?? '').isEmpty) return;
     if (loadMore && (!_hasMore || _isLoadingMore)) return;
-    if (!loadMore && _isLoading) return;
+    if (!loadMore && _isLoading && !silent) return;
 
     if (loadMore) {
       _isLoadingMore = true;

@@ -4,7 +4,7 @@ import 'package:provider/provider.dart';
 import '../../../../app/dialog/loading_manager.dart';
 import '../../../../navigation/core/navigator_service.dart';
 import '../../../../navigation/core/route_paths.dart';
-import '../../home/widgets/mine/shop_recommend_view.dart';
+import '../../../widgets/shop_recommend_view.dart';
 import '../models/order_models.dart';
 import '../viewmodels/order_list_viewmodel.dart';
 import '../widgets/order_list_item_widget.dart';
@@ -47,13 +47,15 @@ class _OrderListPageState extends State<OrderListPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: _titles.length, vsync: this);
-    _tabController.index = widget.currentPage;
+    final currentPage =
+        widget.currentPage.clamp(0, _titles.length - 1).toInt();
+    _tabController.index = currentPage;
     _tabController.addListener(_onTabChanged);
     _searchController = TextEditingController();
     _tabViewModels =
         List.generate(_titles.length, (index) => OrderListTabViewModel(index));
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _tabViewModels[widget.currentPage].refresh(showLoading: true);
+      _tabViewModels[currentPage].refresh(showLoading: currentPage == 0);
     });
   }
 
@@ -111,59 +113,71 @@ class _OrderListPageState extends State<OrderListPage>
   }
 
   Widget _buildTopBar() {
-    return Container(
+    return SizedBox(
       height: 30.h,
-      padding: EdgeInsets.symmetric(horizontal: 11.w),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => Navigator.of(context).pop(),
-            child: Padding(
-              padding: EdgeInsets.only(right: 26.w),
-              child: Image.asset(
-                'assets/images/icon_back.webp',
-                width: 11.w,
-                height: 18.h,
+            behavior: HitTestBehavior.opaque,
+            child: SizedBox(
+              width: 48.w,
+              height: 30.h,
+              child: Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  Positioned(
+                    left: 11.w,
+                    child: Image.asset(
+                      'assets/images/icon_back.webp',
+                      width: 11.w,
+                      height: 18.h,
+                    ),
+                  ),
+                ],
               ),
             ),
           ),
           Expanded(
-            child: Container(
-              height: 30.h,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF4F4F4),
-                borderRadius: BorderRadius.circular(15.r),
-              ),
-              child: Row(
-                children: [
-                  SizedBox(width: 12.w),
-                  Image.asset(
-                    'assets/images/icon_search.webp',
-                    width: 14.w,
-                    height: 14.w,
-                  ),
-                  SizedBox(width: 13.w),
-                  Expanded(
-                    child: TextField(
-                      controller: _searchController,
-                      onChanged: _onSearchChanged,
-                      decoration: InputDecoration(
-                        hintText: '请输入搜索内容',
-                        hintStyle: TextStyle(
-                          fontSize: 14.sp,
-                          color: const Color(0xFFB6B7BB),
+            child: Padding(
+              padding: EdgeInsets.only(right: 12.w),
+              child: Container(
+                height: 30.h,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF4F4F4),
+                  borderRadius: BorderRadius.circular(15.r),
+                ),
+                child: Row(
+                  children: [
+                    SizedBox(width: 12.w),
+                    Image.asset(
+                      'assets/images/icon_search.webp',
+                      width: 14.w,
+                      height: 14.w,
+                    ),
+                    SizedBox(width: 13.w),
+                    Expanded(
+                      child: TextField(
+                        controller: _searchController,
+                        onChanged: _onSearchChanged,
+                        decoration: InputDecoration(
+                          hintText: '请输入搜索内容',
+                          hintStyle: TextStyle(
+                            fontSize: 14.sp,
+                            color: const Color(0xFFB6B7BB),
+                          ),
+                          border: InputBorder.none,
+                          isCollapsed: true,
                         ),
-                        border: InputBorder.none,
-                        isCollapsed: true,
-                      ),
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        color: const Color(0xFF333333),
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          color: const Color(0xFF333333),
+                        ),
                       ),
                     ),
-                  ),
-                  SizedBox(width: 12.w),
-                ],
+                    SizedBox(width: 12.w),
+                  ],
+                ),
               ),
             ),
           ),
@@ -173,19 +187,43 @@ class _OrderListPageState extends State<OrderListPage>
   }
 
   Widget _buildTabBar() {
+    final tabWidth = MediaQuery.of(context).size.width / 5;
+    final indicatorHorizontalInset = (tabWidth - 40.w) / 2;
     return Container(
-      height: 40.h,
+      height: 44.h,
       alignment: Alignment.centerLeft,
       child: TabBar(
         controller: _tabController,
         isScrollable: true,
+        tabAlignment: TabAlignment.start,
+        padding: EdgeInsets.zero,
+        labelPadding: EdgeInsets.zero,
+        dividerColor: Colors.transparent,
         labelColor: const Color(0xFFFF3530),
         unselectedLabelColor: const Color(0xFF333333),
-        indicatorColor: const Color(0xFFFF3530),
-        indicatorWeight: 3.h,
+        indicator: UnderlineTabIndicator(
+          borderSide: BorderSide(
+            color: const Color(0xFFFF3530),
+            width: 3.h,
+          ),
+          insets: EdgeInsets.only(
+            left: indicatorHorizontalInset,
+            right: indicatorHorizontalInset,
+            bottom: 2.h,
+          ),
+          borderRadius: BorderRadius.circular(2.h),
+        ),
+        indicatorSize: TabBarIndicatorSize.label,
         labelStyle: TextStyle(fontSize: 13.sp),
         unselectedLabelStyle: TextStyle(fontSize: 13.sp),
-        tabs: _titles.map((e) => Tab(text: e)).toList(),
+        tabs: _titles
+            .map(
+              (e) => SizedBox(
+                width: tabWidth,
+                child: Tab(text: e),
+              ),
+            )
+            .toList(),
       ),
     );
   }
@@ -214,9 +252,14 @@ class OrderListTabView extends StatefulWidget {
   State<OrderListTabView> createState() => _OrderListTabViewState();
 }
 
-class _OrderListTabViewState extends State<OrderListTabView> {
+class _OrderListTabViewState extends State<OrderListTabView>
+    with AutomaticKeepAliveClientMixin {
   late RefreshController _refreshController;
   List<ProductEntity> _recommendList = [];
+  bool _recommendLoading = false;
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -232,6 +275,7 @@ class _OrderListTabViewState extends State<OrderListTabView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Consumer<OrderListTabViewModel>(
       builder: (context, viewModel, child) {
         final list = viewModel.orders;
@@ -240,13 +284,23 @@ class _OrderListTabViewState extends State<OrderListTabView> {
         }
         return RefreshListWidget(
           controller: _refreshController,
+          enablePullUp: viewModel.hasMore,
           onRefresh: () async {
             await viewModel.refresh(showLoading: false);
+            _refreshController.resetNoData();
             _refreshController.refreshCompleted();
           },
           onLoading: () async {
+            if (!viewModel.hasMore) {
+              _refreshController.loadNoData();
+              return;
+            }
             await viewModel.loadMore();
-            _refreshController.loadComplete();
+            if (viewModel.hasMore) {
+              _refreshController.loadComplete();
+            } else {
+              _refreshController.loadNoData();
+            }
           },
           child: ListView.separated(
             padding: EdgeInsets.only(top: 12.h, bottom: 12.h),
@@ -272,34 +326,49 @@ class _OrderListTabViewState extends State<OrderListTabView> {
   }
 
   Widget _buildRecommend(OrderListTabViewModel viewModel) {
-    if (_recommendList.length < 3) {
+    if (_recommendList.length < 3 && !_recommendLoading) {
+      _recommendLoading = true;
       OrderApi.getRecommendList(
         page: 0,
         onSuccess: (data) {
           final list = data?.list ?? [];
-          if (list.isNotEmpty) {
+          if (mounted && list.isNotEmpty) {
             setState(() {
               _recommendList = list;
             });
           }
+          _recommendLoading = false;
+        },
+        onError: (_) {
+          _recommendLoading = false;
         },
       );
     }
     return RefreshListWidget(
       controller: _refreshController,
+      enablePullUp: viewModel.hasMore,
       onRefresh: () async {
         await viewModel.refresh(showLoading: false);
+        _refreshController.resetNoData();
         _refreshController.refreshCompleted();
       },
       onLoading: () async {
+        if (!viewModel.hasMore) {
+          _refreshController.loadNoData();
+          return;
+        }
         await viewModel.loadMore();
-        _refreshController.loadComplete();
+        if (viewModel.hasMore) {
+          _refreshController.loadComplete();
+        } else {
+          _refreshController.loadNoData();
+        }
       },
-      child: SingleChildScrollView(
-        child: _recommendList.isEmpty
-            ? SizedBox(height: 500.h)
-            : ShopRecommendView(products: _recommendList),
-      ),
+      child: _recommendList.isEmpty
+          ? const SizedBox.shrink()
+          : SingleChildScrollView(
+              child: ShopRecommendView(products: _recommendList),
+            ),
     );
   }
 

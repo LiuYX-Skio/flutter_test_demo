@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
 import '../../../../app/constants/app_constants.dart';
 import '../../../../app/dialog/loading_manager.dart';
 import '../../../../app/provider/user_provider.dart';
 import '../../../../navigation/core/navigator_service.dart';
 import '../../../../navigation/core/route_paths.dart';
-import '../../home/viewmodels/mine_viewmodel.dart';
+import '../../home/api/user_api.dart';
 
 class SystemSettingPage extends StatefulWidget {
   const SystemSettingPage({super.key});
@@ -123,31 +122,34 @@ class _SystemSettingPageState extends State<SystemSettingPage>
   Widget _buildTopBar() {
     return SizedBox(
       height: 44.h,
-      child: Row(
+      child: Stack(
         children: [
-          GestureDetector(
-            onTap: () => Navigator.of(context).pop(),
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12.w),
-              child: Image.asset(
-                'assets/images/icon_back.webp',
-                width: 12.w,
-                height: 18.h,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Text(
-                '设置',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: const Color(0xFF1A1A1A),
+          Positioned(
+            left: 5.w,
+            top: 0,
+            bottom: 0,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => Navigator.of(context).pop(),
+              child: Padding(
+                padding: EdgeInsets.all(10.w),
+                child: Image.asset(
+                  'assets/images/icon_back.webp',
+                  width: 12.w,
+                  height: 18.h,
                 ),
               ),
             ),
           ),
-          SizedBox(width: 36.w),
+          Center(
+            child: Text(
+              '设置',
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: const Color(0xFF1A1A1A),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -271,14 +273,17 @@ class _SystemSettingPageState extends State<SystemSettingPage>
     if (!UserProvider.isLogin()) {
       return;
     }
-    final viewModel = Provider.of<MineViewModel>(context, listen: false);
-    viewModel.loginOut(onSuccess: () async {
-      await LoadingManager.instance.showToast('已退出登录');
-      if (mounted) {
-        setState(() {});
-      }
-      context.nav.push(RoutePaths.auth.login);
-    });
+    UserApi.loginOut(
+      onSuccess: (_) async {
+        await UserProvider.clearUserInfo();
+        await LoadingManager.instance.showToast('已退出登录');
+        if (mounted) {
+          setState(() {});
+        }
+        NavigatorService.instance.pop();
+        NavigatorService.instance.push(RoutePaths.auth.login);
+      },
+    );
   }
 }
 

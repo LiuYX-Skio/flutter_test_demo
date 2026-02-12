@@ -90,7 +90,7 @@ class _ShopDetailBottomWidgetState extends State<ShopDetailBottomWidget> {
               label: '收藏',
               onTap: widget.onCollectTap,
             ),
-            SizedBox(width: 18.w),
+            SizedBox(width: 12.w),
 
             // 购物车按钮（带角标）
             _buildCartButton(),
@@ -102,18 +102,24 @@ class _ShopDetailBottomWidgetState extends State<ShopDetailBottomWidget> {
               text: '加入购物车',
               width: 95.w,
               height: 40.h,
-              backgroundColor: const Color(0xFFFF6B00),
+              backgroundColor: const Color(0xFF343B43),
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(20.r),
+                bottomLeft: Radius.circular(20.r),
+              ),
               onTap: widget.onAddToCartTap,
             ),
-
-            SizedBox(width: 8.w),
 
             // 立即购买按钮
             _buildActionButton(
               text: '立即购买',
               width: 95.w,
               height: 40.h,
-              backgroundColor: const Color(0xFFE65050),
+              backgroundColor: const Color(0xFFFF3530),
+              borderRadius: BorderRadius.only(
+                topRight: Radius.circular(20.r),
+                bottomRight: Radius.circular(20.r),
+              ),
               onTap: widget.onBuyNowTap,
             ),
           ],
@@ -164,7 +170,7 @@ class _ShopDetailBottomWidgetState extends State<ShopDetailBottomWidget> {
     return GestureDetector(
       onTap: widget.onCartTap,
       child: SizedBox(
-        width: 40.w,
+        width: 32.w,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
@@ -229,6 +235,7 @@ class _ShopDetailBottomWidgetState extends State<ShopDetailBottomWidget> {
     required double width,
     required double height,
     required Color backgroundColor,
+    required BorderRadius borderRadius,
     VoidCallback? onTap,
   }) {
     return GestureDetector(
@@ -238,7 +245,7 @@ class _ShopDetailBottomWidgetState extends State<ShopDetailBottomWidget> {
         height: height,
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: borderRadius,
         ),
         child: Center(
           child: Text(

@@ -316,6 +316,7 @@ class HttpClient {
     String filePath, {
     String? fileName,
     Map<String, dynamic>? data,
+    bool showLoading = false,
     ProgressCallback? onSendProgress,
     CancelToken? cancelToken,
     T Function(dynamic json)? fromJsonT,
@@ -323,6 +324,9 @@ class HttpClient {
     void Function(ApiException exception)? onError,
   }) async {
     try {
+      if (showLoading) {
+        LoadingManager.instance.show();
+      }
       final formData = FormData.fromMap({
         'file': await MultipartFile.fromFile(filePath, filename: fileName),
         ...?data,
@@ -397,6 +401,7 @@ class HttpClient {
       if (onError != null) {
         onError(exception);
       }
+      LoadingManager.instance.dismiss();
       return null;
     }
   }

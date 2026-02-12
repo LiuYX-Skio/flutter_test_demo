@@ -62,7 +62,7 @@ class OrderListItemWidget extends StatelessWidget {
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    data.deliveryName ?? '商品名称',
+                    '商品名称',
                     style: TextStyle(
                       fontSize: 15.sp,
                       color: const Color(0xFF1A1A1A),
@@ -85,44 +85,49 @@ class OrderListItemWidget extends StatelessWidget {
             _buildServiceRow('全程价保', '（服务生效）'),
             SizedBox(height: 14.h),
             _buildServiceRow('运费险', '（退换货自动赔）'),
-            SizedBox(height: 14.h),
             if (showTick)
-              GestureDetector(
-                onTap: onService,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '发票',
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          color: const Color(0xFF1A1A1A),
+              Padding(
+                padding: EdgeInsets.only(top: 14.h),
+                child: GestureDetector(
+                  onTap: onService,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '发票',
+                          style: TextStyle(
+                            fontSize: 13.sp,
+                            color: const Color(0xFF1A1A1A),
+                          ),
                         ),
                       ),
-                    ),
-                    Text(
-                      '咨询客服',
-                      style: TextStyle(
-                        fontSize: 13.sp,
-                        color: const Color(0xFF333333),
+                      Text(
+                        '咨询客服',
+                        style: TextStyle(
+                          fontSize: 13.sp,
+                          color: const Color(0xFF333333),
+                        ),
                       ),
-                    ),
-                    SizedBox(width: 10.w),
-                    Image.asset(
-                      'assets/images/icon_right_arrow.png',
-                      width: 6.w,
-                      height: 10.h,
-                    ),
-                  ],
+                      SizedBox(width: 10.w),
+                      Image.asset(
+                        'assets/images/icon_right_arrow.png',
+                        width: 6.w,
+                        height: 10.h,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             if (showNoSupport) ...[
               SizedBox(height: 10.h),
-              Text(
-                '该商品不支持退货',
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  color: const Color(0xFFE65050),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 4.h),
+                child: Text(
+                  '该商品不支持退货',
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    color: const Color(0xFFE65050),
+                  ),
                 ),
               ),
             ],
@@ -137,7 +142,10 @@ class OrderListItemWidget extends StatelessWidget {
               ),
             ],
             SizedBox(height: 15.h),
-            _buildPriceRow(),
+            Align(
+              alignment: Alignment.centerRight,
+              child: _buildPriceRow(),
+            ),
             SizedBox(height: 14.h),
             Row(
               children: [
@@ -231,6 +239,7 @@ class OrderListItemWidget extends StatelessWidget {
   Widget _buildPriceRow() {
     final price = data.payPrice ?? '0.00';
     return Row(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(
           '优惠',

@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test_demo/navigation/core/navigator_service.dart';
 import 'package:flutter_test_demo/navigation/core/route_paths.dart';
-import '../../models/product_models.dart';
+import '../pages/home/models/product_models.dart';
 
 /// 商品推荐视图 - 完全按照Android ShopRecommendView实现
 class ShopRecommendView extends StatelessWidget {
   final List<ProductEntity> products;
+  final ValueChanged<ProductEntity>? onItemTap;
 
   const ShopRecommendView({
     super.key,
     required this.products,
+    this.onItemTap,
   });
 
   @override
@@ -29,7 +32,7 @@ class ShopRecommendView extends StatelessWidget {
   /// 标题行
   Widget _buildTitleRow() {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: 20.h),
+      padding: EdgeInsets.fromLTRB(0, 10.h, 0, 20.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -94,32 +97,28 @@ class ShopRecommendView extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // 商品图片
-            Container(
-              width: double.infinity,
-              height: 170.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(6.r),
-                  topRight: Radius.circular(6.r),
-                ),
-                image: product.imageUrl != null
-                    ? DecorationImage(
-                        image: NetworkImage(product.imageUrl!),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+            ClipRRect(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(6.r),
+                topRight: Radius.circular(6.r),
               ),
-              child: product.imageUrl == null
-                  ? Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFCCCCCC), // shape_cccccc_6_radios_ground
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(6.r),
-                          topRight: Radius.circular(6.r),
-                        ),
+              child: (product.imageUrl ?? '').isNotEmpty
+                  ? CachedNetworkImage(
+                      imageUrl: product.imageUrl!,
+                      width: double.infinity,
+                      height: 170.h,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, __, ___) => Container(
+                        width: double.infinity,
+                        height: 170.h,
+                        color: const Color(0xFFCCCCCC),
                       ),
                     )
-                  : null,
+                  : Container(
+                      width: double.infinity,
+                      height: 170.h,
+                      color: const Color(0xFFCCCCCC),
+                    ),
             ),
 
             // 商品标题
@@ -201,7 +200,7 @@ class ShopRecommendView extends StatelessWidget {
                     'assets/images/icon_shop_car.webp',
                     width: 24.w,
                     height: 24.h,
-                    fit: BoxFit.cover,
+                    fit: BoxFit.fill,
                   ),
                 ],
               ),
@@ -214,6 +213,10 @@ class ShopRecommendView extends StatelessWidget {
 
   /// 商品点击事件
   void _onProductTap(BuildContext context, ProductEntity product) {
+    if (onItemTap != null) {
+      onItemTap!(product);
+      return;
+    }
     if (product.id != null && product.id! > 0) {
       // 跳转到商品详情页
       final routePath = RoutePaths.product.detail;

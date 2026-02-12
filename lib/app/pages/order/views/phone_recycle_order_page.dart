@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_boost/flutter_boost.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../../../app/constants/app_constants.dart';
 import '../../../../app/dialog/loading_manager.dart';
 import '../../../../app/provider/user_provider.dart';
@@ -199,18 +200,16 @@ class _PhoneRecycleOrderPageState extends State<PhoneRecycleOrderPage> {
     }
     return ClipRRect(
       borderRadius: BorderRadius.circular(4.r),
-      child: Image.network(
-        imageUrl,
+      child: CachedNetworkImage(
+        imageUrl: imageUrl,
         width: 37.w,
         height: 37.w,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) {
-          return Image.asset(
-            'assets/images/shape_recycle_logo.webp',
-            width: 37.w,
-            height: 37.w,
-          );
-        },
+        errorWidget: (_, __, ___) => Image.asset(
+          'assets/images/shape_recycle_logo.webp',
+          width: 37.w,
+          height: 37.w,
+        ),
       ),
     );
   }

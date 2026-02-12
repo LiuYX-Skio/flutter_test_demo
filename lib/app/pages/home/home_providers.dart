@@ -10,7 +10,7 @@ import 'viewmodels/mine_viewmodel.dart';
 /// Home模块的Provider包装器
 /// 提供所有ViewModel的依赖注入
 class HomeProviders extends StatelessWidget {
-  const HomeProviders({Key? key}) : super(key: key);
+  const HomeProviders({super.key});
 
   @override
   Widget build(BuildContext context) {

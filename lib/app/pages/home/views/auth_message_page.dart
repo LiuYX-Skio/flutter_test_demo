@@ -1,10 +1,12 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../app/constants/app_constants.dart';
 import '../../../../app/dialog/loading_manager.dart';
 import '../../../../navigation/core/navigator_service.dart';
 import '../../../../navigation/core/route_paths.dart';
@@ -28,6 +30,7 @@ class _AuthMessagePageState extends State<AuthMessagePage> {
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _cardNoController = TextEditingController();
+  late final AuthFlowViewModel _flowViewModel;
 
   bool _agreed = false;
   bool _showManualInput = false;
@@ -36,7 +39,14 @@ class _AuthMessagePageState extends State<AuthMessagePage> {
   String _ocrCardNo = '';
 
   @override
+  void initState() {
+    super.initState();
+    _flowViewModel = AuthFlowViewModel();
+  }
+
+  @override
   void dispose() {
+    _flowViewModel.dispose();
     _nameController.dispose();
     _cardNoController.dispose();
     super.dispose();
@@ -44,8 +54,8 @@ class _AuthMessagePageState extends State<AuthMessagePage> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AuthFlowViewModel(),
+    return ChangeNotifierProvider.value(
+      value: _flowViewModel,
       child: Consumer<AuthFlowViewModel>(
         builder: (_, vm, __) {
           return Scaffold(
@@ -256,7 +266,7 @@ class _AuthMessagePageState extends State<AuthMessagePage> {
               borderRadius: BorderRadius.circular(4.r),
               image: DecorationImage(
                 image: hasImage
-                    ? NetworkImage(imageUrl!)
+                    ? CachedNetworkImageProvider(imageUrl!)
                     : AssetImage(placeholder) as ImageProvider,
                 fit: BoxFit.fill,
               ),
@@ -333,7 +343,10 @@ class _AuthMessagePageState extends State<AuthMessagePage> {
                     onTap: () {
                       NavigatorService.instance.push(
                         RoutePaths.other.webview,
-                        arguments: {'url': '', 'title': '实名认证相关协议'},
+                        arguments: {
+                          'url': AppConstants.userProtocolUrl,
+                          'title': '实名认证相关协议',
+                        },
                       );
                     },
                     child: Text(
@@ -379,7 +392,10 @@ class _AuthMessagePageState extends State<AuthMessagePage> {
     final XFile? file = await _picker.pickImage(source: ImageSource.gallery);
     if (file == null) return;
 
-    final upload = await vm.uploadIdCardImage(file: File(file.path));
+    final upload = await vm.uploadIdCardImage(
+      file: File(file.path),
+      isFront: isFront,
+    );
     if (upload == null) {
       setState(() {
         _showSwitchButton = true;
@@ -423,10 +439,24 @@ class _AuthMessagePageState extends State<AuthMessagePage> {
       return;
     }
 
+    final hasAuthed = await vm.hasAuthentication();
+    if (hasAuthed) {
+      NavigatorService.instance.push(
+        RoutePaths.other.supplementMessage,
+        arguments: {
+          'hasApply': widget.hasApply,
+          'isNeedClose': widget.isNeedClose,
+        },
+      );
+      NavigatorService.instance.pop();
+      return;
+    }
+
     final hasFront = (vm.frontImageUrl ?? '').isNotEmpty;
     final hasBack = (vm.backImageUrl ?? '').isNotEmpty;
+    var needMetaVerify = false;
 
-    if (!hasFront || !hasBack || _ocrName.isEmpty || _ocrCardNo.isEmpty) {
+    if (!hasFront || !hasBack) {
       final name = _nameController.text.trim();
       final cardNo = _cardNoController.text.trim();
       if (name.isEmpty || cardNo.isEmpty) {
@@ -434,11 +464,18 @@ class _AuthMessagePageState extends State<AuthMessagePage> {
         return;
       }
       vm.updateManualIdentity(name: name, cardNo: cardNo);
-    } else {
+      needMetaVerify = true;
+    } else if (_ocrName.isNotEmpty && _ocrCardNo.isNotEmpty) {
       vm.updateManualIdentity(name: _ocrName, cardNo: _ocrCardNo);
+    } else {
+      final name = _nameController.text.trim();
+      final cardNo = _cardNoController.text.trim();
+      if (name.isNotEmpty && cardNo.isNotEmpty) {
+        vm.updateManualIdentity(name: name, cardNo: cardNo);
+      }
     }
 
-    final success = await vm.submitAuth();
+    final success = await vm.submitAuth(needMetaVerify: needMetaVerify);
     if (!success) {
       LoadingManager.instance.showToast(vm.errorMessage ?? '认证失败');
       return;

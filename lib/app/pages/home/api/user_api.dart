@@ -107,6 +107,7 @@ class UserApi {
   /// 上传头像图片
   static Future<void> uploadImage({
     required String filePath,
+    bool showLoading = false,
     void Function(UploadEntity? data)? onSuccess,
     void Function(ApiException exception)? onError,
   }) {
@@ -114,6 +115,7 @@ class UserApi {
       '/api/app/user/upload/image',
       filePath,
       data: {'model': 'user'},
+      showLoading: showLoading,
       onSuccess: onSuccess,
       onError: onError,
     );
@@ -128,6 +130,7 @@ class UserApi {
     return HttpClient.instance.upload<UploadIdCardEntity>(
       '/api/app/user/upload/id-card-upload',
       filePath,
+      showLoading: true,
       onSuccess: onSuccess,
       onError: onError,
     );

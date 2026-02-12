@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_test_demo/app/widgets/refresh_list_widget.dart';
 import 'package:flutter_test_demo/navigation/core/navigator_service.dart';
 import 'package:provider/provider.dart';
@@ -7,7 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../navigation/core/route_paths.dart';
 import '../viewmodels/mine_viewmodel.dart';
 import '../widgets/mine/user_order_view.dart';
-import '../widgets/mine/shop_recommend_view.dart';
+import '../../../widgets/shop_recommend_view.dart';
 import '../../mine/widgets/user_month_view.dart';
 import '../../../../app/provider/user_provider.dart';
 
@@ -71,7 +72,8 @@ class _MineTabViewState extends State<MineTabView>
                   _buildTopUserInfo(viewModel),
 
                   // 月付视图
-                  if (viewModel.isMonthPayOpen) _buildMonthPayView(viewModel),
+                  if (viewModel.isMonthPayOpen && !viewModel.isTestAccount)
+                    _buildMonthPayView(viewModel),
 
                   // 回收模块
                   if (_shouldShowRecycleModule(viewModel)) _buildRecycleModule(),
@@ -116,7 +118,7 @@ class _MineTabViewState extends State<MineTabView>
                     borderRadius: BorderRadius.circular(6.w),
                     image: DecorationImage(
                       image: viewModel.userAvatar != null
-                          ? NetworkImage(viewModel.userAvatar!)
+                          ? CachedNetworkImageProvider(viewModel.userAvatar!)
                           : const AssetImage('assets/images/icon_default.png') as ImageProvider,
                       fit: BoxFit.cover,
                     ),
@@ -138,7 +140,7 @@ class _MineTabViewState extends State<MineTabView>
                         style: TextStyle(
                           fontSize: 17.sp,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF1A1A1A), // color_1A1A1A
+                          color: const Color(0xFF1A1A1A),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -148,7 +150,7 @@ class _MineTabViewState extends State<MineTabView>
                         viewModel.userPhone,
                         style: TextStyle(
                           fontSize: 13.sp,
-                          color: const Color(0xFF333333), // color_333333
+                          color: const Color(0xFF333333),
                         ),
                       ),
                     ],
@@ -164,7 +166,7 @@ class _MineTabViewState extends State<MineTabView>
                     'assets/images/icon_gwc.png',
                     '购物车',
                     () => _onShopCarTap(viewModel),
-                    marginEnd: 15.w,
+                    marginStart: 15.w,
                   ),
 
                   // 设置
@@ -172,7 +174,7 @@ class _MineTabViewState extends State<MineTabView>
                     'assets/images/icon_sz.png',
                     '设置',
                     () => _onSettingTap(),
-                    marginEnd: 15.w,
+                    marginStart: 15.w,
                   ),
 
                   // 客服
@@ -180,6 +182,7 @@ class _MineTabViewState extends State<MineTabView>
                     'assets/images/icon_kf.png',
                     '客服',
                     () => _onServiceTap(viewModel),
+                    marginStart: 15.w,
                     marginEnd: 18.w,
                   ),
 
@@ -188,6 +191,7 @@ class _MineTabViewState extends State<MineTabView>
                     'assets/images/mine_wallet.webp',
                     '钱包',
                     () => _onWalletTap(viewModel),
+                    marginStart: 0,
                     marginEnd: 18.w,
                   ),
                 ],
@@ -205,18 +209,24 @@ class _MineTabViewState extends State<MineTabView>
   }
 
   /// 顶部图标按钮
-  Widget _buildTopIconButton(String iconPath, String title, VoidCallback onTap, {required double marginEnd}) {
+  Widget _buildTopIconButton(
+    String iconPath,
+    String title,
+    VoidCallback onTap, {
+    required double marginStart,
+    double marginEnd = 0,
+  }) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.only(left: marginEnd.w),
+        margin: EdgeInsets.only(left: marginStart, right: marginEnd),
         child: Column(
           children: [
             Image.asset(
               iconPath,
               width: 22.w,
               height: 22.w,
-              fit: BoxFit.cover,
+              fit: BoxFit.fill,
             ),
             SizedBox(height: 4.h),
             Text(
@@ -328,8 +338,9 @@ class _MineTabViewState extends State<MineTabView>
     }
   }
 
-  void _onSettingTap() {
-    context.nav.push(RoutePaths.user.settings);
+  Future<void> _onSettingTap() async {
+    await context.nav.push(RoutePaths.user.settings);
+    await _viewModel.syncUserStateAfterRouteBack();
   }
 
   void _onServiceTap(MineViewModel viewModel) {
@@ -349,12 +360,12 @@ class _MineTabViewState extends State<MineTabView>
   }
 
   void _onRecycleTap() {
-    context.nav.push(RoutePaths.other.phoneRecycleMsg);
+    context.nav.push(RoutePaths.other.recycleOrderList);
   }
 
   Future<void> _onMonthApply(MineViewModel viewModel) async {
     if (!viewModel.isLogin) {
-      context.nav.push(RoutePaths.auth.login);
+      NavigatorService.instance.push(RoutePaths.auth.login);
       return;
     }
 
@@ -366,29 +377,36 @@ class _MineTabViewState extends State<MineTabView>
     if (hasApply) {
       if (status == 2) {
         if (viewModel.isTestAccount) {
-          context.nav.push(RoutePaths.other.newMonthPay);
+          NavigatorService.instance.push(RoutePaths.other.newMonthPay);
         } else {
-          context.nav.push(RoutePaths.other.limitMoney);
+          NavigatorService.instance.push(RoutePaths.other.limitMoney);
         }
       } else if (status == 1) {
-        context.nav.push(RoutePaths.other.examineIng);
+        NavigatorService.instance.push(RoutePaths.other.examineIng);
       } else if (status == 3) {
-        context.nav.push(
+        NavigatorService.instance.push(
           RoutePaths.other.examineFail,
           arguments: {'nextApplyTime': creditDetail?.nextApplyTime},
         );
       } else {
-        if (viewModel.userInfo?.hasAuthentication == true) {
-          context.nav.push(RoutePaths.other.supplementMessage);
-        } else {
-          context.nav.push(
-            RoutePaths.other.applyQuota,
-            arguments: {'hasApply': true},
-          );
+        if (viewModel.userInfo == null) {
+          await viewModel.fetchUserInfo();
         }
+        if (!mounted) {
+          return;
+        }
+        final hasAuthentication = viewModel.userInfo?.hasAuthentication == true;
+        if (hasAuthentication) {
+          NavigatorService.instance.push(RoutePaths.other.supplementMessage);
+          return;
+        }
+        NavigatorService.instance.push(
+          RoutePaths.other.applyQuota,
+          arguments: {'hasApply': true},
+        );
       }
     } else {
-      context.nav.push(
+      NavigatorService.instance.push(
         RoutePaths.other.applyQuota,
         arguments: {'hasApply': false},
       );
@@ -396,7 +414,7 @@ class _MineTabViewState extends State<MineTabView>
   }
 
   void _onMonthBill() {
-    context.nav.push(RoutePaths.other.monthBill);
+    NavigatorService.instance.push(RoutePaths.other.monthBill);
   }
 
   void _onLoading() async {

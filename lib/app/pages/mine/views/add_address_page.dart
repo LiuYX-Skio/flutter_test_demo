@@ -74,40 +74,49 @@ class _AddAddressPageState extends State<AddAddressPage> {
   @override
   Widget build(BuildContext context) {
     final isEdit = widget.addressId != null && widget.addressId!.isNotEmpty;
+    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
     return Scaffold(
       backgroundColor: const Color(0xFFF7F9FC),
-      body: Column(
-        children: [
-          SizedBox(height: 44.h),
-          _buildTopBar(isEdit),
-          SizedBox(height: 10.h),
-          _buildInputRow(
-            title: '收货人',
-            hint: '请填写收货人真实姓名',
-            controller: _nameController,
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.only(bottom: keyboardInset + 20.h),
+          child: Column(
+            children: [
+              SizedBox(height: 44.h),
+              _buildTopBar(isEdit),
+              SizedBox(height: 10.h),
+              _buildInputRow(
+                title: '收货人',
+                hint: '请填写收货人真实姓名',
+                controller: _nameController,
+              ),
+              _buildDivider(),
+              _buildInputRow(
+                title: '手机号码',
+                hint: '请填写收货人手机号',
+                controller: _phoneController,
+                keyboardType: TextInputType.number,
+                maxLength: 11,
+              ),
+              _buildDivider(),
+              _buildDistrictRow(),
+              _buildDivider(),
+              _buildInputRow(
+                title: '详细地址',
+                hint: '如道路、门牌号、小区、楼栋号、单元室等',
+                controller: _detailController,
+              ),
+              _buildDivider(),
+              _buildDefaultRow(),
+              SizedBox(height: 40.h),
+              _buildSaveButton(),
+              SizedBox(height: 75.h),
+            ],
           ),
-          _buildDivider(),
-          _buildInputRow(
-            title: '手机号码',
-            hint: '请填写收货人手机号',
-            controller: _phoneController,
-            keyboardType: TextInputType.number,
-            maxLength: 11,
-          ),
-          _buildDivider(),
-          _buildDistrictRow(),
-          _buildDivider(),
-          _buildInputRow(
-            title: '详细地址',
-            hint: '如道路、门牌号、小区、楼栋号、单元室等',
-            controller: _detailController,
-          ),
-          _buildDivider(),
-          _buildDefaultRow(),
-          const Spacer(),
-          _buildSaveButton(),
-          SizedBox(height: 75.h),
-        ],
+        ),
       ),
     );
   }
@@ -231,41 +240,31 @@ class _AddAddressPageState extends State<AddAddressPage> {
   }
 
   Widget _buildDefaultRow() {
-    return Container(
-      height: 62.h,
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              '设置默认地址',
-              style: TextStyle(fontSize: 16.sp, color: const Color(0xFF333333)),
-            ),
-          ),
-          GestureDetector(
-            onTap: () => setState(() => _isDefault = true),
-            child: Visibility(
-              visible: _isDefault,
-              child: Image.asset(
-                'assets/images/icon_open.png',
-                width: 40.w,
-                height: 20.h,
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => setState(() => _isDefault = !_isDefault),
+      child: Container(
+        height: 62.h,
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                '设置默认地址',
+                style:
+                    TextStyle(fontSize: 16.sp, color: const Color(0xFF333333)),
               ),
             ),
-          ),
-          GestureDetector(
-            onTap: () => setState(() => _isDefault = false),
-            child: Visibility(
-              visible: !_isDefault,
-              child: Image.asset(
-                'assets/images/icon_close.png',
-                width: 40.w,
-                height: 20.h,
-              ),
+            Image.asset(
+              _isDefault
+                  ? 'assets/images/icon_open.png'
+                  : 'assets/images/icon_close.png',
+              width: 40.w,
+              height: 20.h,
             ),
-          ),
-          SizedBox(width: 10.w),
-        ],
+            SizedBox(width: 10.w),
+          ],
+        ),
       ),
     );
   }

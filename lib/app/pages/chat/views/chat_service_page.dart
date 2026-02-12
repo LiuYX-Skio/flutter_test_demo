@@ -64,21 +64,26 @@ class _ChatServicePageState extends State<ChatServicePage> {
                   Expanded(
                     child: Container(
                       color: const Color(0xFFEDEDED),
-                      child: SmartRefresher(
-                        controller: _refreshController,
-                        enablePullDown: true,
-                        enablePullUp: false,
-                        onRefresh: () => _onRefresh(viewModel),
-                        header: const ClassicHeader(),
-                        child: ListView.builder(
-                          controller: _scrollController,
-                          padding: EdgeInsets.symmetric(vertical: 12.h),
-                          itemCount: viewModel.messages.length,
-                          itemBuilder: (BuildContext context, int index) {
-                            final ChatMessageEntity message =
-                                viewModel.messages[index];
-                            return _buildMessageItem(message);
-                          },
+                      child: Listener(
+                        behavior: HitTestBehavior.opaque,
+                        onPointerDown: (_) => viewModel.hideAlbumPanel(),
+                        child: SmartRefresher(
+                          controller: _refreshController,
+                          enablePullDown: true,
+                          enablePullUp: false,
+                          onRefresh: () => _onRefresh(viewModel),
+                          header: const ClassicHeader(),
+                          child: ListView.separated(
+                            controller: _scrollController,
+                            padding: EdgeInsets.symmetric(vertical: 12.h),
+                            itemCount: viewModel.messages.length,
+                            separatorBuilder: (_, __) => SizedBox(height: 12.h),
+                            itemBuilder: (BuildContext context, int index) {
+                              final ChatMessageEntity message =
+                                  viewModel.messages[index];
+                              return _buildMessageItem(message);
+                            },
+                          ),
                         ),
                       ),
                     ),
@@ -95,35 +100,37 @@ class _ChatServicePageState extends State<ChatServicePage> {
 
   Widget _buildTopBar() {
     return Container(
+      height: 60.h,
       margin: EdgeInsets.only(top: 10.h),
-      height: 44.h,
       child: Stack(
-        alignment: Alignment.center,
         children: [
-          Positioned(
-            left: 5.w,
-            child: GestureDetector(
-              onTap: () => NavigatorService.instance.pop(),
-              child: Container(
-                padding: EdgeInsets.all(10.w),
-                child: Image.asset(
-                  'assets/images/icon_back.webp',
-                  width: 12.w,
-                  height: 18.h,
-                  errorBuilder: (_, __, ___) => Icon(
-                    Icons.arrow_back_ios_new_rounded,
-                    size: 18.sp,
-                    color: const Color(0xFF1A1A1A),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Container(
+              margin: EdgeInsets.only(left: 5.w),
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => NavigatorService.instance.pop(),
+                child: Padding(
+                  padding: EdgeInsets.all(10.w),
+                  child: Image.asset(
+                    'assets/images/icon_back.webp',
+                    width: 12.w,
+                    height: 18.h,
+                    fit: BoxFit.fill,
                   ),
                 ),
               ),
             ),
           ),
-          Text(
-            '在线客服【唯一客服工作日9:00-18:00】',
-            style: TextStyle(
-              fontSize: 16.sp,
-              color: const Color(0xFF1A1A1A),
+          Align(
+            alignment: Alignment.center,
+            child: Text(
+              '在线客服【唯一客服工作日9:00-18:00】',
+              style: TextStyle(
+                fontSize: 16.sp,
+                color: const Color(0xFF1A1A1A),
+              ),
             ),
           ),
         ],
@@ -168,6 +175,7 @@ class _ChatServicePageState extends State<ChatServicePage> {
                     ),
                     child: TextField(
                       controller: _contentController,
+                      maxLines: 1,
                       decoration: InputDecoration(
                         hintText: '请输入聊天信息',
                         hintStyle: TextStyle(
@@ -215,12 +223,9 @@ class _ChatServicePageState extends State<ChatServicePage> {
                     Container(
                       width: 50.w,
                       height: 50.w,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: const Color(0xFF707070), width: 1.w),
-                        borderRadius: BorderRadius.circular(6.r),
-                      ),
+                      alignment: Alignment.center,
                       child: Icon(
-                        Icons.image_outlined,
+                        Icons.photo_library_outlined,
                         size: 26.sp,
                         color: const Color(0xFF707070),
                       ),
@@ -249,7 +254,7 @@ class _ChatServicePageState extends State<ChatServicePage> {
         message.viewType == ChatViewTypes.rightImage;
 
     final Widget bubble = isImage
-        ? _buildImageBubble(message)
+        ? _buildImageBubble(message, isLeft: isLeft)
         : Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 13.h),
             decoration: BoxDecoration(
@@ -291,7 +296,7 @@ class _ChatServicePageState extends State<ChatServicePage> {
     );
   }
 
-  Widget _buildImageBubble(ChatMessageEntity message) {
+  Widget _buildImageBubble(ChatMessageEntity message, {required bool isLeft}) {
     final String? imageUrl = message.resolvedImageUrl();
     return GestureDetector(
       onTap: () {
@@ -311,16 +316,22 @@ class _ChatServicePageState extends State<ChatServicePage> {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(4.r),
-          child: (imageUrl ?? '').isNotEmpty
-              ? CachedNetworkImage(
-                  imageUrl: imageUrl!,
-                  fit: BoxFit.cover,
-                  width: 150.w,
-                  height: 150.w,
-                  placeholder: (_, __) => _buildImagePlaceholder(),
-                  errorWidget: (_, __, ___) => _buildImagePlaceholder(),
-                )
-              : _buildImagePlaceholder(),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minWidth: isLeft ? 0 : 100.w,
+              minHeight: isLeft ? 0 : 100.w,
+              maxWidth: 180.w,
+              maxHeight: 180.w,
+            ),
+            child: (imageUrl ?? '').isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: imageUrl!,
+                    fit: BoxFit.cover,
+                    placeholder: (_, __) => _buildImagePlaceholder(),
+                    errorWidget: (_, __, ___) => _buildImagePlaceholder(),
+                  )
+                : _buildImagePlaceholder(),
+          ),
         ),
       ),
     );

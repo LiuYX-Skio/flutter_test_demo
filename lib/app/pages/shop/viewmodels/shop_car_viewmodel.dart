@@ -19,6 +19,7 @@ class ShopCarViewModel extends ChangeNotifier {
         _cartList
           ..clear()
           ..addAll((data?.list ?? const <ShopCarEntity?>[]).whereType<ShopCarEntity>());
+        _selectedRecycleType = null;
       },
     );
     _isLoading = false;
@@ -39,21 +40,27 @@ class ShopCarViewModel extends ChangeNotifier {
 
   bool get isSelectAll => _cartList.isNotEmpty && _cartList.every((item) => item.isSelect);
 
-  void toggleSelectAll(bool selected) {
-    _selectedRecycleType = selected ? _selectedRecycleType : null;
+  bool toggleSelectAll(bool selected) {
+    if (selected) {
+      final normalizedTypes = _cartList.map((item) => _normalizeRecycleType(item.recycleType)).toSet();
+      if (normalizedTypes.length > 1) {
+        return false;
+      }
+      _selectedRecycleType = normalizedTypes.isEmpty ? null : normalizedTypes.first;
+    } else {
+      _selectedRecycleType = null;
+    }
     for (var index = 0; index < _cartList.length; index++) {
       _cartList[index] = _cartList[index].copyWith(isSelect: selected);
     }
-    if (!selected) {
-      _selectedRecycleType = null;
-    }
     notifyListeners();
+    return true;
   }
 
   bool toggleItemSelect(int index) {
     if (index < 0 || index >= _cartList.length) return false;
     final item = _cartList[index];
-    final currentType = item.recycleType ?? 3;
+    final currentType = _normalizeRecycleType(item.recycleType);
     if (!item.isSelect && _selectedRecycleType != null && _selectedRecycleType != currentType) {
       return false;
     }
@@ -68,13 +75,23 @@ class ShopCarViewModel extends ChangeNotifier {
     return true;
   }
 
+  int _normalizeRecycleType(int? type) => type ?? 3;
+
   Future<void> increase(int index) async {
     if (index < 0 || index >= _cartList.length) return;
     final item = _cartList[index];
     final next = item.cartNum + 1;
     final id = item.id;
     if ((id ?? '').isEmpty) return;
-    await ShopDetailApi.updateShopCartNum(id: id!, number: next);
+    var success = false;
+    await ShopDetailApi.updateShopCartNum(
+      id: id!,
+      number: next,
+      onSuccess: (_) {
+        success = true;
+      },
+    );
+    if (!success) return;
     _cartList[index] = item.copyWith(cartNum: next);
     notifyListeners();
   }
@@ -86,10 +103,25 @@ class ShopCarViewModel extends ChangeNotifier {
     if ((id ?? '').isEmpty) return;
     final next = item.cartNum - 1;
     if (next <= 0) {
-      await ShopDetailApi.deleteShopCart(id: id!);
+      var success = false;
+      await ShopDetailApi.deleteShopCart(
+        id: id!,
+        onSuccess: (_) {
+          success = true;
+        },
+      );
+      if (!success) return;
       _cartList.removeAt(index);
     } else {
-      await ShopDetailApi.updateShopCartNum(id: id!, number: next);
+      var success = false;
+      await ShopDetailApi.updateShopCartNum(
+        id: id!,
+        number: next,
+        onSuccess: (_) {
+          success = true;
+        },
+      );
+      if (!success) return;
       _cartList[index] = item.copyWith(cartNum: next);
     }
     if (_cartList.where((element) => element.isSelect).isEmpty) {
@@ -120,4 +152,3 @@ class ShopCarViewModel extends ChangeNotifier {
     return count;
   }
 }
-

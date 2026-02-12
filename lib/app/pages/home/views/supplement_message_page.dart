@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:image_picker/image_picker.dart';
@@ -255,7 +256,7 @@ class _SupplementMessagePageState extends State<SupplementMessagePage> {
                 borderRadius: BorderRadius.circular(6.r),
                 image: DecorationImage(
                   image: scoreUrl != null && scoreUrl.isNotEmpty
-                      ? NetworkImage(scoreUrl)
+                      ? CachedNetworkImageProvider(scoreUrl)
                       : const AssetImage('assets/images/id_card_front.png')
                           as ImageProvider,
                   fit: BoxFit.cover,

@@ -124,20 +124,10 @@ class MenuCategoryEntity {
   @JsonKey(name: 'url')
   final String? iconUrl;
 
-  /// 排序
-  @JsonKey(fromJson: AppDataUtils.toInt)
-  final int? sort;
-
-  /// 显示状态
-  @JsonKey(fromJson: AppDataUtils.toInt)
-  final int? show;
-
   MenuCategoryEntity({
     this.id,
     this.name,
     this.iconUrl,
-    this.sort,
-    this.show,
   });
 
   factory MenuCategoryEntity.fromJson(Map<String, dynamic> json) {

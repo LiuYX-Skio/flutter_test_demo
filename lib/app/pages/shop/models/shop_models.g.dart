@@ -63,7 +63,7 @@ Map<String, dynamic> _$ShopSortShopEntityToJson(ShopSortShopEntity instance) =>
 ShopCarEntity _$ShopCarEntityFromJson(Map<String, dynamic> json) =>
     ShopCarEntity(
       isSelect: json['isSelect'] as bool? ?? false,
-      attrId: json['attrId'] as String?,
+      attrId: AppDataUtils.toStringValue(json['attrId']),
       attrStatus: AppDataUtils.toBool(json['attrStatus']) ?? false,
       cartNum: AppDataUtils.toInt(json['cartNum']) ?? 0,
       id: AppDataUtils.toStringValue(json['id']),

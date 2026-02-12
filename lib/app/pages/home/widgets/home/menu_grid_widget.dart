@@ -9,10 +9,10 @@ class MenuGridWidget extends StatelessWidget {
   final Function(MenuCategoryEntity)? onTap;
 
   const MenuGridWidget({
-    Key? key,
+    super.key,
     required this.menus,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,21 +23,23 @@ class MenuGridWidget extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 11.w),
       child: GridView.builder(
+        padding: EdgeInsets.zero,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: 5, // Android是5列
           mainAxisSpacing: 0,
           crossAxisSpacing: 0,
-          mainAxisExtent: 95.h,    // 固定高度，每个格子 90 像素
+          mainAxisExtent: 90.h,
         ),
         itemCount: menus.length,
         itemBuilder: (context, index) {
           final menu = menus[index];
           return GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () => onTap?.call(menu),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Container(
                   width: 48.w,

@@ -10,6 +10,9 @@ import '../../navigation/core/route_paths.dart';
 /// 认证拦截器
 /// 用于在请求头中添加 Token 等认证信息
 class AuthInterceptor extends Interceptor {
+  static bool _isNavigatingToLogin = false;
+  static DateTime? _lastLoginNavigateAt;
+
   /// Token 获取回调
   final Future<String?> Function()? onGetToken;
 
@@ -30,7 +33,6 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    print("token = "+UserProvider.getUserToken());
     // 获取 Token
     if (onGetToken != null) {
       final token = await onGetToken!();
@@ -55,7 +57,7 @@ class AuthInterceptor extends Interceptor {
         final code = json['code'] as int? ?? json['status'] as int? ?? 0;
         if (code == AppConstants.AUTH_LOGIN_CODE) {
           UserProvider.clearUserInfo();
-          NavigatorService.instance.push(RoutePaths.auth.login);
+          _navigateToLoginIfNeeded();
         }
       }
     } catch (e) {
@@ -63,6 +65,22 @@ class AuthInterceptor extends Interceptor {
     }
 
     super.onResponse(response, handler);
+  }
+
+  void _navigateToLoginIfNeeded() {
+    if (_isNavigatingToLogin) {
+      return;
+    }
+    final now = DateTime.now();
+    final last = _lastLoginNavigateAt;
+    if (last != null && now.difference(last).inMilliseconds < 800) {
+      return;
+    }
+    _lastLoginNavigateAt = now;
+    _isNavigatingToLogin = true;
+    NavigatorService.instance.push(RoutePaths.auth.login).whenComplete(() {
+      _isNavigatingToLogin = false;
+    });
   }
 
   @override

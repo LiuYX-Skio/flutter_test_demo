@@ -28,17 +28,17 @@ Map<String, dynamic> _$OrderOutEntityToJson(OrderOutEntity instance) =>
 
 OrderListEntity _$OrderListEntityFromJson(Map<String, dynamic> json) =>
     OrderListEntity(
-      createTime: json['createTime'] as String?,
-      deliveryId: json['deliveryId'] as String?,
-      deliveryName: json['deliveryName'] as String?,
-      deliveryType: json['deliveryType'] as String?,
+      createTime: AppDataUtils.toStringValue(json['createTime']),
+      deliveryId: AppDataUtils.toStringValue(json['deliveryId']),
+      deliveryName: AppDataUtils.toStringValue(json['deliveryName']),
+      deliveryType: AppDataUtils.toStringValue(json['deliveryType']),
       id: AppDataUtils.toInt(json['id']),
       offlinePayStatus: AppDataUtils.toInt(json['offlinePayStatus']),
-      orderId: json['orderId'] as String?,
+      orderId: AppDataUtils.toStringValue(json['orderId']),
       paid: AppDataUtils.toBool(json['paid']),
-      payPostage: json['payPostage'] as String?,
-      payPrice: json['payPrice'] as String?,
-      payTime: json['payTime'] as String?,
+      payPostage: AppDataUtils.toStringValue(json['payPostage']),
+      payPrice: AppDataUtils.toStringValue(json['payPrice']),
+      payTime: AppDataUtils.toStringValue(json['payTime']),
       refundStatus: AppDataUtils.toInt(json['refundStatus']),
       refundReason: json['refundReason'] as String?,
       shippingType: AppDataUtils.toInt(json['shippingType']),
@@ -86,9 +86,9 @@ Map<String, dynamic> _$OrderListEntityToJson(OrderListEntity instance) =>
 CartInfoEntity _$CartInfoEntityFromJson(Map<String, dynamic> json) =>
     CartInfoEntity(
       id: AppDataUtils.toInt(json['id']),
-      orderId: json['orderId'] as String?,
-      productId: json['productId'] as String?,
-      unique: json['unique'] as String?,
+      orderId: AppDataUtils.toStringValue(json['orderId']),
+      productId: AppDataUtils.toStringValue(json['productId']),
+      unique: AppDataUtils.toStringValue(json['unique']),
       info: json['info'] == null
           ? null
           : CartDetailInfoEntity.fromJson(
@@ -108,19 +108,19 @@ CartDetailInfoEntity _$CartDetailInfoEntityFromJson(Map<String, dynamic> json) =
     CartDetailInfoEntity(
       attrValueId: AppDataUtils.toInt(json['attrValueId']),
       giveIntegral: AppDataUtils.toInt(json['giveIntegral']),
-      image: json['image'] as String?,
-      isReply: json['isReply'] as String?,
+      image: AppDataUtils.toStringValue(json['image']),
+      isReply: AppDataUtils.toStringValue(json['isReply']),
       isSub: AppDataUtils.toBool(json['isSub']),
       payNum: AppDataUtils.toInt(json['payNum']),
-      price: json['price'] as String?,
-      productId: json['productId'] as String?,
-      productName: json['productName'] as String?,
-      productType: json['productType'] as String?,
-      sku: json['sku'] as String?,
+      price: AppDataUtils.toStringValue(json['price']),
+      productId: AppDataUtils.toStringValue(json['productId']),
+      productName: AppDataUtils.toStringValue(json['productName']),
+      productType: AppDataUtils.toStringValue(json['productType']),
+      sku: AppDataUtils.toStringValue(json['sku']),
       tempId: AppDataUtils.toInt(json['tempId']),
-      vipPrice: json['vipPrice'] as String?,
-      volume: json['volume'] as String?,
-      weight: json['weight'] as String?,
+      vipPrice: AppDataUtils.toStringValue(json['vipPrice']),
+      volume: AppDataUtils.toStringValue(json['volume']),
+      weight: AppDataUtils.toStringValue(json['weight']),
     );
 
 Map<String, dynamic> _$CartDetailInfoEntityToJson(
@@ -145,14 +145,14 @@ Map<String, dynamic> _$CartDetailInfoEntityToJson(
 
 OrderInfoListEntity _$OrderInfoListEntityFromJson(Map<String, dynamic> json) =>
     OrderInfoListEntity(
-      attrId: json['attrId'] as String?,
+      attrId: AppDataUtils.toStringValue(json['attrId']),
       cartNum: AppDataUtils.toInt(json['cartNum']),
-      image: json['image'] as String?,
+      image: AppDataUtils.toStringValue(json['image']),
       isReply: AppDataUtils.toInt(json['isReply']),
-      price: json['price'] as String?,
-      productId: json['productId'] as String?,
-      sku: json['sku'] as String?,
-      storeName: json['storeName'] as String?,
+      price: AppDataUtils.toStringValue(json['price']),
+      productId: AppDataUtils.toStringValue(json['productId']),
+      sku: AppDataUtils.toStringValue(json['sku']),
+      storeName: AppDataUtils.toStringValue(json['storeName']),
       hasCallback: AppDataUtils.toBool(json['hasCallback']),
     );
 
@@ -374,21 +374,21 @@ Map<String, dynamic> _$OrderDetailEntityToJson(OrderDetailEntity instance) =>
 ConfigOrderInfoEntity _$ConfigOrderInfoEntityFromJson(
         Map<String, dynamic> json) =>
     ConfigOrderInfoEntity(
-      attrValueId: json['attrValueId'] as String?,
-      giveIntegral: json['giveIntegral'] as String?,
-      image: json['image'] as String?,
-      isReply: json['isReply'] as String?,
+      attrValueId: AppDataUtils.toStringValue(json['attrValueId']),
+      giveIntegral: AppDataUtils.toStringValue(json['giveIntegral']),
+      image: AppDataUtils.toStringValue(json['image']),
+      isReply: AppDataUtils.toStringValue(json['isReply']),
       isSub: AppDataUtils.toBool(json['isSub']),
       payNum: AppDataUtils.toInt(json['payNum']),
-      price: json['price'] as String?,
-      productId: json['productId'] as String?,
-      productName: json['productName'] as String?,
-      productType: json['productType'] as String?,
-      sku: json['sku'] as String?,
-      tempId: json['tempId'] as String?,
-      vipPrice: json['vipPrice'] as String?,
-      volume: json['volume'] as String?,
-      weight: json['weight'] as String?,
+      price: AppDataUtils.toStringValue(json['price']),
+      productId: AppDataUtils.toStringValue(json['productId']),
+      productName: AppDataUtils.toStringValue(json['productName']),
+      productType: AppDataUtils.toStringValue(json['productType']),
+      sku: AppDataUtils.toStringValue(json['sku']),
+      tempId: AppDataUtils.toStringValue(json['tempId']),
+      vipPrice: AppDataUtils.toStringValue(json['vipPrice']),
+      volume: AppDataUtils.toStringValue(json['volume']),
+      weight: AppDataUtils.toStringValue(json['weight']),
       hasCallback: AppDataUtils.toBool(json['hasCallback']),
       hasMonthCredit: AppDataUtils.toBool(json['hasMonthCredit']),
     );
@@ -418,25 +418,25 @@ Map<String, dynamic> _$ConfigOrderInfoEntityToJson(
 ConfigOrderInfoOutEntity _$ConfigOrderInfoOutEntityFromJson(
         Map<String, dynamic> json) =>
     ConfigOrderInfoOutEntity(
-      addressId: json['addressId'] as String?,
+      addressId: AppDataUtils.toStringValue(json['addressId']),
       cartIdList: (json['cartIdList'] as List<dynamic>?)
           ?.map((e) => e.toString())
           .toList(),
-      city: json['city'] as String?,
-      couponFee: json['couponFee'] as String?,
-      detail: json['detail'] as String?,
-      district: json['district'] as String?,
-      freightFee: json['freightFee'] as String?,
-      orderProNum: json['orderProNum'] as String?,
-      payFee: json['payFee'] as String?,
-      phone: json['phone'] as String?,
-      proTotalFee: json['proTotalFee'] as String?,
-      province: json['province'] as String?,
-      realName: json['realName'] as String?,
-      remark: json['remark'] as String?,
-      userBalance: json['userBalance'] as String?,
-      userCouponId: json['userCouponId'] as String?,
-      userIntegral: json['userIntegral'] as String?,
+      city: AppDataUtils.toStringValue(json['city']),
+      couponFee: AppDataUtils.toStringValue(json['couponFee']),
+      detail: AppDataUtils.toStringValue(json['detail']),
+      district: AppDataUtils.toStringValue(json['district']),
+      freightFee: AppDataUtils.toStringValue(json['freightFee']),
+      orderProNum: AppDataUtils.toStringValue(json['orderProNum']),
+      payFee: AppDataUtils.toStringValue(json['payFee']),
+      phone: AppDataUtils.toStringValue(json['phone']),
+      proTotalFee: AppDataUtils.toStringValue(json['proTotalFee']),
+      province: AppDataUtils.toStringValue(json['province']),
+      realName: AppDataUtils.toStringValue(json['realName']),
+      remark: AppDataUtils.toStringValue(json['remark']),
+      userBalance: AppDataUtils.toStringValue(json['userBalance']),
+      userCouponId: AppDataUtils.toStringValue(json['userCouponId']),
+      userIntegral: AppDataUtils.toStringValue(json['userIntegral']),
       hasMonthCredit: AppDataUtils.toBool(json['hasMonthCredit']),
       orderDetailList: (json['orderDetailList'] as List<dynamic>?)
           ?.map((e) => ConfigOrderInfoEntity.fromJson(e as Map<String, dynamic>))
@@ -470,10 +470,10 @@ Map<String, dynamic> _$ConfigOrderInfoOutEntityToJson(
 ConfigOrderOutEntity _$ConfigOrderOutEntityFromJson(
         Map<String, dynamic> json) =>
     ConfigOrderOutEntity(
-      aliPayStatus: json['aliPayStatus'] as String?,
-      payWeixinOpen: json['payWeixinOpen'] as String?,
-      preOrderNo: json['preOrderNo'] as String?,
-      yuePayStatus: json['yuePayStatus'] as String?,
+      aliPayStatus: AppDataUtils.toStringValue(json['aliPayStatus']),
+      payWeixinOpen: AppDataUtils.toStringValue(json['payWeixinOpen']),
+      preOrderNo: AppDataUtils.toStringValue(json['preOrderNo']),
+      yuePayStatus: AppDataUtils.toStringValue(json['yuePayStatus']),
       orderInfoVo: json['orderInfoVo'] == null
           ? null
           : ConfigOrderInfoOutEntity.fromJson(
@@ -493,14 +493,14 @@ Map<String, dynamic> _$ConfigOrderOutEntityToJson(
 ConfigOrderPriceEntity _$ConfigOrderPriceEntityFromJson(
         Map<String, dynamic> json) =>
     ConfigOrderPriceEntity(
-      couponFee: json['couponFee'] as String?,
-      deductionPrice: json['deductionPrice'] as String?,
-      freightFee: json['freightFee'] as String?,
-      payFee: json['payFee'] as String?,
-      proTotalFee: json['proTotalFee'] as String?,
-      surplusIntegral: json['surplusIntegral'] as String?,
-      useIntegral: json['useIntegral'] as String?,
-      usedIntegral: json['usedIntegral'] as String?,
+      couponFee: AppDataUtils.toStringValue(json['couponFee']),
+      deductionPrice: AppDataUtils.toStringValue(json['deductionPrice']),
+      freightFee: AppDataUtils.toStringValue(json['freightFee']),
+      payFee: AppDataUtils.toStringValue(json['payFee']),
+      proTotalFee: AppDataUtils.toStringValue(json['proTotalFee']),
+      surplusIntegral: AppDataUtils.toStringValue(json['surplusIntegral']),
+      useIntegral: AppDataUtils.toStringValue(json['useIntegral']),
+      usedIntegral: AppDataUtils.toStringValue(json['usedIntegral']),
     );
 
 Map<String, dynamic> _$ConfigOrderPriceEntityToJson(

@@ -396,10 +396,16 @@ class RouteRegistry {
       ),
       RoutePaths.other.applyQuota.path: RouteDefinition(
         name: RoutePaths.other.applyQuota.path,
-        builder: (context) => ChangeNotifierProvider(
-          create: (_) => ApplyQuotaViewModel(),
-          child: const ApplyQuotaTabView(),
-        ),
+        builder: (context) {
+          final args = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          return ChangeNotifierProvider(
+            create: (_) => ApplyQuotaViewModel(),
+            child: ApplyQuotaTabView(
+              showBackButton: args?['showBackButton'] as bool? ?? false,
+            ),
+          );
+        },
       ),
       RoutePaths.other.monthBill.path: RouteDefinition(
         name: RoutePaths.other.monthBill.path,
@@ -573,11 +579,11 @@ class RouteRegistry {
           final args = ModalRoute.of(context)?.settings.arguments
               as Map<String, dynamic>?;
           return ShopPayPage(
-            orderNo: args?['orderNo'] as String?,
-            orderId: args?['orderId'] as String?,
-            payMoney: args?['payMoney'] as String?,
-            hasMonthCredit: args?['hasMonthCredit'] as bool? ?? true,
-            viewType: args?['viewType'] as int? ?? 0,
+            orderNo: _asString(args?['orderNo']),
+            orderId: _asString(args?['orderId']),
+            payMoney: _asString(args?['payMoney']),
+            hasMonthCredit: _asBool(args?['hasMonthCredit']) ?? true,
+            viewType: _asInt(args?['viewType']) ?? 0,
           );
         },
       ),
@@ -602,10 +608,11 @@ class RouteRegistry {
         builder: (context) {
           final args = ModalRoute.of(context)?.settings.arguments
               as Map<String, dynamic>?;
-          final items =
-              (args?['items'] as List<ConfigOrderDeliveryEntity>?) ?? [];
-          final addressId = args?['addressId'] as String?;
-          final preOrderType = args?['preOrderType'] as String?;
+          final items = _parseConfigOrderItems(args);
+          final addressId = _asString(args?['addressId']);
+          final preOrderType =
+              _asString(args?['preOrderType']) ??
+              _asString((args?['preOrderData'] as Map?)?['preOrderType']);
           return ChangeNotifierProvider(
             create: (_) => ConfigOrderViewModel(),
             child: ConfigOrderPage(
@@ -631,6 +638,67 @@ class RouteRegistry {
     // 这里可以注册一些基础的全局中间件
     // RouteConfig().registerGlobalMiddleware(LoggingMiddleware());
     // RouteConfig().registerGlobalMiddleware(CrashReportingMiddleware());
+  }
+
+  List<ConfigOrderDeliveryEntity> _parseConfigOrderItems(
+    Map<String, dynamic>? args,
+  ) {
+    if (args == null) return const <ConfigOrderDeliveryEntity>[];
+
+    final dynamic rawItems = args['items'];
+    final List<ConfigOrderDeliveryEntity> itemsFromItems =
+        _parseConfigOrderItemsFromRaw(rawItems);
+    if (itemsFromItems.isNotEmpty) return itemsFromItems;
+
+    final dynamic preOrderData = args['preOrderData'];
+    if (preOrderData is Map) {
+      return _parseConfigOrderItemsFromRaw(preOrderData['data']);
+    }
+    return const <ConfigOrderDeliveryEntity>[];
+  }
+
+  List<ConfigOrderDeliveryEntity> _parseConfigOrderItemsFromRaw(dynamic raw) {
+    if (raw is! List) return const <ConfigOrderDeliveryEntity>[];
+    final List<ConfigOrderDeliveryEntity> result = <ConfigOrderDeliveryEntity>[];
+    for (final dynamic element in raw) {
+      if (element is ConfigOrderDeliveryEntity) {
+        result.add(element);
+        continue;
+      }
+      if (element is Map) {
+        final entity = ConfigOrderDeliveryEntity(
+          attrValueId: _asString(element['attrValueId']),
+          orderNo: _asString(element['orderNo']),
+          productId: _asString(element['productId']),
+          productNum: _asInt(element['productNum']) ?? 1,
+          sku: _asString(element['sku']),
+          shoppingCartId: _asString(element['shoppingCartId']),
+        );
+        result.add(entity);
+      }
+    }
+    return result;
+  }
+
+  String? _asString(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    return value.toString();
+  }
+
+  int? _asInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    return int.tryParse(value.toString());
+  }
+
+  bool? _asBool(dynamic value) {
+    if (value == null) return null;
+    if (value is bool) return value;
+    final raw = value.toString().toLowerCase();
+    if (raw == '1' || raw == 'true') return true;
+    if (raw == '0' || raw == 'false') return false;
+    return null;
   }
 
   /// 创建 Flutter Boost 路由工厂

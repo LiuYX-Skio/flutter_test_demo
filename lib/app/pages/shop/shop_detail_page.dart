@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test_demo/app/dialog/loading_manager.dart';
+import 'package:flutter_test_demo/app/constants/app_constants.dart';
 import 'package:flutter_test_demo/navigation/core/navigator_service.dart';
 import 'package:flutter_test_demo/navigation/core/route_paths.dart';
 import 'package:provider/provider.dart';
@@ -8,7 +9,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_html/flutter_html.dart';
 
-import '../home/widgets/mine/shop_recommend_view.dart';
+import '../../widgets/shop_recommend_view.dart';
 import '../order/models/order_models.dart';
 import '../mine/models/address_models.dart';
 import 'viewmodels/shop_detail_viewmodel.dart';
@@ -23,9 +24,9 @@ class ShopDetailPage extends StatefulWidget {
   final int productId;
 
   const ShopDetailPage({
-    Key? key,
+    super.key,
     required this.productId,
-  }) : super(key: key);
+  });
 
   @override
   State<ShopDetailPage> createState() => _ShopDetailPageState();
@@ -85,99 +86,14 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
                     // Banner轮播图
                     _buildBannerSection(viewModel),
 
-                    // 商品信息
                     SliverToBoxAdapter(
-                      child: ShopDetailMessageWidget(
-                        shopDetail: viewModel.shopDetail,
-                        defaultAddress: viewModel.defaultAddress,
-                        onAddressTap: () {
-                          _handleSelectAddress(viewModel);
-                        },
-                        onSkuSelected: (sku) {
-                          if (sku != null) {
-                            viewModel.updateSelectedAttr(
-                              sku.id?.toString() ?? '',
-                              sku.sku,
-                            );
-                          }
-                        },
-                      ),
-                    ),
-
-                    // 不支持退货提示
-                    if (viewModel.shopDetail?.productInfo?.hasCallback == false)
-                      SliverToBoxAdapter(
-                        child: Container(
-                          margin: const EdgeInsets.only(left: 13, top: 20),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFFFE5E5),
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            '该商品不支持退货',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Color(0xFFE65050),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                    // 商品详情标题
-                    SliverToBoxAdapter(
-                      child: Container(
-                        margin: const EdgeInsets.only(left: 13, top: 18),
-                        child: const Text(
-                          '商品详情',
-                          style: TextStyle(
-                            fontSize: 15,
-                            color: Color(0xFF1A1A1A),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-
-                    // 商品详情富文本
-                    _buildRichTextSection(viewModel),
-
-                    // 分隔线
-                    if (viewModel.commentList != null &&
-                        viewModel.commentList!.list != null &&
-                        viewModel.commentList!.list!.isNotEmpty)
-                      const SliverToBoxAdapter(
-                        child: SizedBox(height: 8),
-                      ),
-
-                    // 评论区域
-                    SliverToBoxAdapter(
-                      child: ShopDetailCommentWidget(
-                        commentData: viewModel.commentList,
-                        onViewAllTap: () {
-                          _handleViewAllComments();
-                        },
-                      ),
-                    ),
-
-                    // 推荐商品
-                    _buildRecommendSection(viewModel),
-
-                    // 底部占位
-                    const SliverToBoxAdapter(
-                      child: SizedBox(height: 65),
+                      child: _buildDetailContent(viewModel),
                     ),
                   ],
                 ),
 
                 // 返回按钮
                 _buildBackButton(),
-
-                // Banner位置指示器
-                _buildBannerIndicator(viewModel),
 
                 // 底部操作栏
                 Positioned(
@@ -193,7 +109,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
                     onBuyNowTap: () => _handleBuyNow(viewModel),
                     onHomeTap: () => Navigator.of(context).pop(),
                     onServiceTap: () {
-                      // 原生为客服入口；此处保持占位（具体跳转依赖业务接入）
+                      NavigatorService.instance.push(RoutePaths.other.chatService);
                     },
                     onCartTap: () {
                       NavigatorService.instance.push(RoutePaths.product.cart);
@@ -203,6 +119,100 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
               ],
             );
           },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailContent(ShopDetailViewModel viewModel) {
+    final bool hasComment = viewModel.commentList?.list?.isNotEmpty ?? false;
+    final bool hasRecommend = viewModel.recommendList?.list?.isNotEmpty ?? false;
+    return Transform.translate(
+      offset: Offset(0, 0.h),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 18.h),
+            ShopDetailMessageWidget(
+              shopDetail: viewModel.shopDetail,
+              defaultAddress: viewModel.defaultAddress,
+              onAddressTap: () {
+                _handleSelectAddress(viewModel);
+              },
+              onSkuSelected: (sku) {
+                if (sku != null) {
+                  viewModel.updateSelectedAttr(
+                    sku.id?.toString() ?? '',
+                    sku.sku,
+                  );
+                }
+              },
+            ),
+            Container(
+              height: 8.h,
+              color: const Color(0xFFF7F9FC),
+            ),
+            if (viewModel.shopDetail?.productInfo?.hasCallback == false)
+              Container(
+                margin: EdgeInsets.only(left: 13.w, top: 6.h),
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(4.r),
+                  border: Border.all(
+                    color: const Color(0xFFE65050),
+                    width: 1.w,
+                  ),
+                ),
+                child: Text(
+                  '该商品不支持退货',
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: const Color(0xFFE65050),
+                  ),
+                ),
+              ),
+            Padding(
+              padding: EdgeInsets.only(left: 13.w, top: 18.h),
+              child: Text(
+                '图文详情',
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  color: const Color(0xFF1A1A1A),
+                ),
+              ),
+            ),
+            _buildRichTextSection(viewModel),
+            if (hasComment)
+              Container(
+                height: 8.h,
+                margin: EdgeInsets.only(top: 22.h),
+                color: const Color(0xFFF7F9FC),
+              ),
+            if (hasComment)
+              Padding(
+                padding: EdgeInsets.only(top: 16.h),
+                child: ShopDetailCommentWidget(
+                  commentData: viewModel.commentList,
+                  onViewAllTap: _handleViewAllComments,
+                ),
+              ),
+            if (hasRecommend)
+              Container(
+                height: 20.h,
+                color: const Color(0xFFF7F9FC),
+              ),
+            _buildRecommendSection(viewModel),
+            Container(
+              height: 90.h,
+              color: const Color(0xFFF7F9FC),
+            ),
+          ],
         ),
       ),
     );
@@ -224,32 +234,59 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
     return SliverToBoxAdapter(
       child: SizedBox(
         height: 362,
-        child: CarouselSlider(
-          options: CarouselOptions(
-            height: 362,
-            viewportFraction: 1.0,
-            autoPlay: true,
-            autoPlayInterval: const Duration(seconds: 5),
-            onPageChanged: (index, reason) {
-              setState(() {
-                _currentBannerIndex = index;
-              });
-            },
-          ),
-          items: images.map((imageUrl) {
-            return CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              placeholder: (context, url) => Container(
-                color: Colors.grey[300],
+        child: Stack(
+          children: [
+            CarouselSlider(
+              options: CarouselOptions(
+                height: 362,
+                viewportFraction: 1.0,
+                autoPlay: true,
+                autoPlayInterval: const Duration(seconds: 5),
+                onPageChanged: (index, reason) {
+                  setState(() {
+                    _currentBannerIndex = index;
+                  });
+                },
               ),
-              errorWidget: (context, url, error) => Container(
-                color: Colors.grey[300],
-                child: const Icon(Icons.image, size: 50, color: Colors.white),
+              items: images.map((imageUrl) {
+                return CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey[300],
+                  ),
+                  errorWidget: (context, url, error) => Container(
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.image, size: 50, color: Colors.white),
+                  ),
+                );
+              }).toList(),
+            ),
+            Positioned(
+              right: 12.w,
+              bottom: 20.h,
+              child: Container(
+                width: 38.w,
+                height: 20.h,
+                decoration: BoxDecoration(
+                  color: const Color(0x66000000),
+                  borderRadius: BorderRadius.circular(10.r),
+                ),
+                alignment: Alignment.center,
+                child: Padding(
+                  padding: EdgeInsets.only(top: 2.h),
+                  child: Text(
+                    '${_currentBannerIndex + 1}/${images.length}',
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
               ),
-            );
-          }).toList(),
+            ),
+          ],
         ),
       ),
     );
@@ -260,15 +297,53 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
     final content = viewModel.shopDetail?.productInfo?.content;
 
     if (content == null || content.isEmpty) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
+      return const SizedBox.shrink();
     }
 
-    return SliverToBoxAdapter(
-      child: Container(
-        width: double.infinity,
-        margin: const EdgeInsets.only(top: 16),
-        color: Colors.white,
-        child: _buildHtmlContent(content),
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(top: 16.h),
+      color: Colors.white,
+      child: _buildHtmlContent(content),
+    );
+  }
+
+  /// 构建推荐商品区域
+  Widget _buildRecommendSection(ShopDetailViewModel viewModel) {
+    final products = viewModel.recommendList?.list;
+
+    if (products == null || products.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return Container(
+      color: const Color(0xFFF7F9FC),
+      child: ShopRecommendView(products: products),
+    );
+  }
+
+  /// 构建返回按钮
+  Widget _buildBackButton() {
+    return Positioned(
+      left: 12.w,
+      top: 50.h,
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).pop(),
+        child: Container(
+          width: 30.w,
+          height: 30.w,
+          decoration: BoxDecoration(
+            color: const Color(0x7FFFFFFF),
+            borderRadius: BorderRadius.circular(15.r),
+          ),
+          alignment: Alignment.center,
+          child: Image.asset(
+            'assets/images/icon_shop_detail_back.webp',
+            width: 10.w,
+            height: 17.h,
+            fit: BoxFit.fill,
+          ),
+        ),
       ),
     );
   }
@@ -281,6 +356,25 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
 
     return Html(
       data: htmlContent,
+      extensions: [
+        TagExtension(
+          tagsToExtend: const {'img'},
+          builder: (extensionContext) {
+            final rawSrc = extensionContext.attributes['src'];
+            if (rawSrc == null || rawSrc.isEmpty) {
+              return const SizedBox.shrink();
+            }
+            final imageUrl = _resolveHtmlImageUrl(rawSrc);
+            return CachedNetworkImage(
+              imageUrl: imageUrl,
+              width: double.infinity,
+              fit: BoxFit.fitWidth,
+              placeholder: (context, url) => const SizedBox.shrink(),
+              errorWidget: (context, url, error) => const SizedBox.shrink(),
+            );
+          },
+        ),
+      ],
       style: {
         "body": Style(
           fontSize: FontSize(14),
@@ -292,72 +386,21 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
           margin: Margins.only(bottom: 8),
         ),
         "img": Style(
-          width: Width(375.w, Unit.px),
+          width: Width(double.infinity),
+          height: Height.auto(),
           display: Display.block,
         ),
       },
     );
   }
 
-  /// 构建推荐商品区域
-  Widget _buildRecommendSection(ShopDetailViewModel viewModel) {
-    final products = viewModel.recommendList?.list;
-
-    if (products == null || products.isEmpty) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
+  String _resolveHtmlImageUrl(String url) {
+    final uri = Uri.tryParse(url);
+    if (uri != null && uri.hasScheme) {
+      return url;
     }
-
-    return SliverToBoxAdapter(
-      child: Container(
-        margin: const EdgeInsets.only(top: 20),
-        color: const Color(0xFFF7F9FC),
-        child: ShopRecommendView(products: products),
-      ),
-    );
-  }
-
-  /// 构建返回按钮
-  Widget _buildBackButton() {
-    return Positioned(
-      left: 12.w,
-      top: 46.h,
-      child: GestureDetector(
-        onTap: () => Navigator.of(context).pop(),
-        child: Image.asset(
-          'assets/images/icon_shop_detail_back.webp',
-          width: 30.w,
-          height: 30.w,
-        ),
-      ),
-    );
-  }
-
-  /// 构建Banner位置指示器
-  Widget _buildBannerIndicator(ShopDetailViewModel viewModel) {
-    final images = viewModel.shopDetail?.productInfo?.sliderImageList ?? [];
-
-    if (images.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    return Positioned(
-      right: 12,
-      top: 307,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.5),
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Text(
-          '${_currentBannerIndex + 1}/${images.length}',
-          style: const TextStyle(
-            fontSize: 11,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
+    final baseUri = Uri.parse(AppConstants.baseUrl);
+    return baseUri.resolve(url).toString();
   }
 
   /// 处理收藏
@@ -375,12 +418,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
     }
 
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(isCollected ? '取消收藏成功' : '收藏成功'),
-          duration: const Duration(seconds: 1),
-        ),
-      );
+      LoadingManager.instance.showToast(isCollected ? '取消收藏成功' : '收藏成功');
     }
   }
 
@@ -395,12 +433,7 @@ class _ShopDetailPageState extends State<ShopDetailPage> {
     );
 
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('加入购物车成功'),
-          duration: Duration(seconds: 1),
-        ),
-      );
+      LoadingManager.instance.showToast('加入购物车成功');
     }
   }
 

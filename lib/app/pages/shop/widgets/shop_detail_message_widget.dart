@@ -130,7 +130,7 @@ class _ShopDetailMessageWidgetState extends State<ShopDetailMessageWidget> {
   void _showImagePreview(String imageUrl) {
     showDialog<void>(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.85),
+      barrierColor: Colors.black.withValues(alpha: 0.85),
       builder: (context) {
         return GestureDetector(
           onTap: () => Navigator.of(context).pop(),
@@ -159,24 +159,29 @@ class _ShopDetailMessageWidgetState extends State<ShopDetailMessageWidget> {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.white,
-      padding: EdgeInsets.fromLTRB(13.w, 16.h, 13.w, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // 价格区域
           _buildPriceSection(),
-          SizedBox(height: 12.h),
 
           // 商品标题
           _buildTitleSection(),
 
           // SKU规格列表
-          _buildSkuSection(),
+          Padding(
+            padding: EdgeInsets.only(top: 8.h, left: 12.w, right: 12.w),
+            child: _buildSkuSection(),
+          ),
 
-          SizedBox(height: 20.h),
+          Container(
+            height: 8.h,
+            margin: EdgeInsets.only(top: 10.h),
+            color: const Color(0xFFF7F9FC),
+          ),
 
           // 地址区域
-          if (widget.defaultAddress != null) _buildAddressSection(),
+          _buildAddressSection(),
         ],
       ),
     );
@@ -188,46 +193,52 @@ class _ShopDetailMessageWidgetState extends State<ShopDetailMessageWidget> {
     final priceStr = price.toStringAsFixed(2);
     final parts = priceStr.split('.');
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.baseline,
-      textBaseline: TextBaseline.alphabetic,
-      children: [
-        Text(
-          '¥',
-          style: TextStyle(
-            fontSize: 16.sp,
-            color: Color(0xFFE65050),
-            fontWeight: FontWeight.bold,
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 11.w,vertical: 0.h),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.baseline,
+        textBaseline: TextBaseline.alphabetic,
+        children: [
+          Text(
+            '¥',
+            style: TextStyle(
+              fontSize: 15.sp,
+              color: const Color(0xFFFF3530),
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        Text(
-          parts[0],
-          style: TextStyle(
-            fontSize: 28.sp,
-            color: Color(0xFFE65050),
-            fontWeight: FontWeight.bold,
+          Text(
+            parts[0],
+            style: TextStyle(
+              fontSize: 22.sp,
+              color: const Color(0xFFFF3530),
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        Text(
-          '.${parts[1]}',
-          style: TextStyle(
-            fontSize: 16.sp,
-            color: Color(0xFFE65050),
-            fontWeight: FontWeight.bold,
+          Text(
+            '.${parts[1]}',
+            style: TextStyle(
+              fontSize: 15.sp,
+              color: const Color(0xFFFF3530),
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   /// 构建标题区域
   Widget _buildTitleSection() {
-    return Text(
-      widget.shopDetail?.productInfo?.storeName ?? '',
-      style: TextStyle(
-        fontSize: 15.sp,
-        color: Color(0xFF1A1A1A),
-        fontWeight: FontWeight.w500,
+    return Padding(
+      padding: EdgeInsets.only(top: 1.h, left: 12.w, right: 12.w),
+      child: Text(
+        widget.shopDetail?.productInfo?.storeName ?? '',
+        style: TextStyle(
+          fontSize: 15.sp,
+          color: const Color(0xFF1A1A1A),
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }
@@ -262,7 +273,7 @@ class _ShopDetailMessageWidgetState extends State<ShopDetailMessageWidget> {
             ),
             SizedBox(height: 12.h),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.w),
+              padding: EdgeInsets.symmetric(horizontal: 1.w),
               child: Wrap(
                 spacing: 10.w,
                 runSpacing: 10.h,
@@ -364,55 +375,51 @@ class _ShopDetailMessageWidgetState extends State<ShopDetailMessageWidget> {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(height: 8.h),
-        ...groups,
-      ],
+      children: groups,
     );
   }
 
   /// 构建地址区域
   Widget _buildAddressSection() {
     final address = _formatAddress();
+    final bool hasAddress = address.isNotEmpty;
 
     return GestureDetector(
       onTap: widget.onAddressTap,
       child: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF7F9FC),
-          borderRadius: BorderRadius.circular(8.r),
-        ),
+        height: 48.h,
+        padding: EdgeInsets.symmetric(horizontal: 12.w),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/images/icon_auth_location.png',
-              width: 16.w,
-              height: 16.h,
-              errorBuilder: (context, error, stackTrace) {
-                return Icon(
-                  Icons.location_on,
-                  size: 16.w,
-                  color: Color(0xFF999999),
-                );
-              },
+            SizedBox(
+              width: 70.w,
+              child: Text(
+                '收货地址',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  color: const Color(0xFF84838B),
+                ),
+              ),
             ),
-            SizedBox(width: 8.w),
             Expanded(
               child: Text(
                 address,
                 style: TextStyle(
-                  fontSize: 13.sp,
-                  color: Color(0xFF333333),
+                  fontSize: 14.sp,
+                  color:
+                      hasAddress ? const Color(0xFF1A1A1A) : const Color(0xFFCCCCCC),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 14.w,
-              color: Color(0xFF999999),
+            SizedBox(width: 15.w),
+            Image.asset(
+              'assets/images/icon_detail_arrow.png',
+              width: 8.w,
+              height: 12.h,
+              fit: BoxFit.fill,
             ),
           ],
         ),
@@ -422,7 +429,7 @@ class _ShopDetailMessageWidgetState extends State<ShopDetailMessageWidget> {
 
   /// 格式化地址
   String _formatAddress() {
-    if (widget.defaultAddress == null) return '请选择收货地址';
+    if (widget.defaultAddress == null) return '请添加收货地址';
 
     final buffer = StringBuffer();
     if (widget.defaultAddress!.province != null) {

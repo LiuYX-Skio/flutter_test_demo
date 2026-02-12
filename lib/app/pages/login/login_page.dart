@@ -30,7 +30,10 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final keyboardInset = MediaQuery.of(context).viewInsets.bottom;
+    final keyboardVisible = keyboardInset > 0;
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: Consumer<LoginViewModel>(
         builder: (context, viewModel, child) {
           return SafeArea(
@@ -42,7 +45,11 @@ class _LoginPageState extends State<LoginPage> {
                 // 主内容区域
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 28.w),
+                    padding: EdgeInsets.only(
+                      left: 28.w,
+                      right: 28.w,
+                      bottom: keyboardInset + 16.h,
+                    ),
                     child: Column(
                       children: [
                         SizedBox(height: 42.h),
@@ -87,12 +94,13 @@ class _LoginPageState extends State<LoginPage> {
                 ),
 
                 // 协议同意区域
-                ProtocolAgreement(
-                  isAgreed: viewModel.isProtocolAgreed,
-                  onToggle: () => viewModel.toggleProtocolAgreement(),
-                  onUserProtocol: _openUserProtocol,
-                  onPrivacyProtocol: _openPrivacyProtocol,
-                ),
+                if (!keyboardVisible)
+                  ProtocolAgreement(
+                    isAgreed: viewModel.isProtocolAgreed,
+                    onToggle: () => viewModel.toggleProtocolAgreement(),
+                    onUserProtocol: _openUserProtocol,
+                    onPrivacyProtocol: _openPrivacyProtocol,
+                  ),
               ],
             ),
           );

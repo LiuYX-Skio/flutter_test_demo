@@ -56,13 +56,23 @@ class AlipayHbStageItemWidget extends StatelessWidget {
                     ],
                   ),
                 ),
-                Image.asset(
-                  selected
-                      ? 'assets/images/icon_pay_select.webp'
-                      : 'assets/images/ic_un_select.png',
-                  width: 20.w,
-                  height: 20.w,
-                ),
+                selected
+                    ? Image.asset(
+                        'assets/images/icon_pay_select.webp',
+                        width: 20.w,
+                        height: 20.w,
+                      )
+                    : Container(
+                        width: 20.w,
+                        height: 20.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: const Color(0xFF909090),
+                            width: 1.w,
+                          ),
+                        ),
+                      ),
                 SizedBox(width: 16.w),
               ],
             ),

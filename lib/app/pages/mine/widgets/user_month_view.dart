@@ -133,11 +133,18 @@ class UserMonthView extends StatelessWidget {
 
   String _formatValue(String? value) {
     if (value == null || value.isEmpty) return '--';
-    return value;
+    final number = double.tryParse(value);
+    if (number == null) {
+      return value;
+    }
+    if (number == number.truncateToDouble()) {
+      return number.toInt().toString();
+    }
+    return number.toStringAsFixed(2).replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
   }
 
   String _formatDay(int? day) {
     if (day == null || day == 0) return '--';
-    return '${day}日';
+    return '$day日';
   }
 }

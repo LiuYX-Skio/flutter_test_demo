@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_test_demo/app/constants/app_constants.dart';
 import '../../../../navigation/core/navigator_service.dart';
 import '../../../../navigation/core/route_paths.dart';
 import '../models/shop_detail_models.dart';
@@ -53,6 +54,7 @@ class _ShopCommentListPageState extends State<ShopCommentListPage> {
         child: Column(
           children: [
             _buildTopBar(),
+            SizedBox(height: 6.h),
             Expanded(
               child: Consumer<ShopCommentViewModel>(
                 builder: (_, vm, __) {
@@ -86,18 +88,30 @@ class _ShopCommentListPageState extends State<ShopCommentListPage> {
 
   Widget _buildTopBar() {
     return SizedBox(
+      width: double.infinity,
       height: 44.h,
       child: Stack(
         alignment: Alignment.center,
         children: [
           Positioned(
-            left: 11.w,
-            child: GestureDetector(
-              onTap: () => NavigatorService.instance.pop(),
-              child: Image.asset(
-                'assets/images/icon_back.webp',
-                width: 11.w,
-                height: 18.h,
+            left: 6.w,
+            child: SizedBox(
+              width: 44.w,
+              height: 44.h,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => NavigatorService.instance.pop(),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: EdgeInsets.only(left: 6.w),
+                    child: Image.asset(
+                      'assets/images/icon_back.webp',
+                      width: 11.w,
+                      height: 18.h,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -114,6 +128,7 @@ class _ShopCommentListPageState extends State<ShopCommentListPage> {
   }
 
   Widget _buildItem(ShopCommentEntity item) {
+    final imageUrls = _normalizeImageUrls(item.pics);
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 12.w),
       padding: EdgeInsets.all(12.w),
@@ -129,7 +144,7 @@ class _ShopCommentListPageState extends State<ShopCommentListPage> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(16.r),
                 child: CachedNetworkImage(
-                  imageUrl: item.avatar ?? '',
+                  imageUrl: _resolveImageUrl(item.avatar ?? ''),
                   width: 32.w,
                   height: 32.w,
                   fit: BoxFit.cover,
@@ -166,14 +181,14 @@ class _ShopCommentListPageState extends State<ShopCommentListPage> {
               height: 1.4,
             ),
           ),
-          if ((item.pics ?? const <String?>[]).isNotEmpty) ...[
+          if (imageUrls.isNotEmpty) ...[
             SizedBox(height: 10.h),
             SizedBox(
               height: 72.w,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (_, index) {
-                  final url = item.pics![index];
+                  final url = imageUrls[index];
                   return GestureDetector(
                     onTap: () {
                       NavigatorService.instance.push(
@@ -188,17 +203,48 @@ class _ShopCommentListPageState extends State<ShopCommentListPage> {
                         width: 72.w,
                         height: 72.w,
                         fit: BoxFit.cover,
+                        placeholder: (_, __) => Container(
+                          width: 72.w,
+                          height: 72.w,
+                          color: const Color(0xFFF0F0F0),
+                        ),
+                        errorWidget: (_, __, ___) => const SizedBox.shrink(),
                       ),
                     ),
                   );
                 },
                 separatorBuilder: (_, __) => SizedBox(width: 8.w),
-                itemCount: item.pics!.length,
+                itemCount: imageUrls.length,
               ),
             ),
           ],
         ],
       ),
     );
+  }
+
+  List<String> _normalizeImageUrls(List<String?>? pics) {
+    if (pics == null || pics.isEmpty) {
+      return const <String>[];
+    }
+    return pics
+        .whereType<String>()
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .map(_resolveImageUrl)
+        .toList();
+  }
+
+  String _resolveImageUrl(String url) {
+    final value = url.trim();
+    if (value.isEmpty) {
+      return '';
+    }
+    final uri = Uri.tryParse(value);
+    if (uri != null && uri.hasScheme) {
+      return value;
+    }
+    final baseUri = Uri.parse(AppConstants.baseUrl);
+    return baseUri.resolve(value).toString();
   }
 }

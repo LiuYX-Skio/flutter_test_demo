@@ -14,6 +14,7 @@ class OrderListTabViewModel extends ChangeNotifier {
 
   List<OrderListEntity> get orders => List.unmodifiable(_orders);
   bool get isLoading => _loading;
+  bool get hasMore => _totalPage == -1 || _page <= _totalPage;
 
   void setKeyword(String? keyword, {bool refreshNow = false}) {
     _keyword = keyword;
@@ -28,7 +29,7 @@ class OrderListTabViewModel extends ChangeNotifier {
   }
 
   Future<void> loadMore() async {
-    if (_totalPage != -1 && _page > _totalPage) {
+    if (!hasMore) {
       return;
     }
     await _loadOrders(isRefresh: false, showLoading: false);

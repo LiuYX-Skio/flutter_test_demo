@@ -4,8 +4,13 @@ import 'package:flutter/foundation.dart';
 
 import '../api/user_api.dart';
 import '../models/auth_models.dart';
+import '../services/auth_face_service.dart';
 
 class AuthFlowViewModel extends ChangeNotifier {
+  AuthFlowViewModel({AuthFaceService? authFaceService})
+      : _authFaceService = authFaceService ?? AuthFaceService();
+
+  final AuthFaceService _authFaceService;
   bool _isLoading = false;
   String? _errorMessage;
   String? _frontImageUrl;
@@ -29,19 +34,17 @@ class AuthFlowViewModel extends ChangeNotifier {
 
   Future<UploadIdCardEntity?> uploadIdCardImage({
     required File file,
+    required bool isFront,
   }) async {
     _setLoading(true);
     _errorMessage = null;
-    UploadIdCardEntity? result;
-    await UserApi.uploadIdCardImage(
+    final result = await _authFaceService.uploadIdCardImage(
       filePath: file.path,
-      onSuccess: (data) {
-        result = data;
-      },
-      onError: (exception) {
-        _errorMessage = exception.message;
-      },
+      isFront: isFront,
     );
+    if (result == null) {
+      _errorMessage = '图片上传失败';
+    }
     _setLoading(false);
     return result;
   }
@@ -94,7 +97,11 @@ class AuthFlowViewModel extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<bool> submitAuth() async {
+  Future<bool> hasAuthentication() async {
+    return _authFaceService.hasAuthentication();
+  }
+
+  Future<bool> submitAuth({required bool needMetaVerify}) async {
     final name = (_realName ?? '').trim();
     final cardNo = (_idCard ?? '').trim();
     if (name.isEmpty || cardNo.isEmpty) {
@@ -105,43 +112,20 @@ class AuthFlowViewModel extends ChangeNotifier {
 
     _setLoading(true);
     _errorMessage = null;
-
-    bool verified = false;
-    await UserApi.authIdCard(
-      name: name,
-      cardNo: cardNo,
-      onSuccess: (data) {
-        verified = data == true;
-      },
-      onError: (exception) {
-        _errorMessage = exception.message;
-      },
+    final result = await _authFaceService.submitAuth(
+      realName: name,
+      idCard: cardNo,
+      frontImageUrl: _frontImageUrl,
+      backImageUrl: _backImageUrl,
+      needMetaVerify: needMetaVerify,
     );
-    if (!verified) {
-      _setLoading(false);
-      notifyListeners();
-      return false;
+    if (!result.success) {
+      _errorMessage = result.message ?? '认证失败';
     }
-
-    bool authSuccess = false;
-    await UserApi.authRealName(
-      data: {
-        'name': name,
-        'cardNo': cardNo,
-        'cardFront': _frontImageUrl,
-        'cardSide': _backImageUrl,
-      },
-      onSuccess: (data) {
-        authSuccess = (data ?? '').isNotEmpty;
-      },
-      onError: (exception) {
-        _errorMessage = exception.message;
-      },
-    );
 
     _setLoading(false);
     notifyListeners();
-    return authSuccess;
+    return result.success;
   }
 
   Future<bool> submitMonthApply({

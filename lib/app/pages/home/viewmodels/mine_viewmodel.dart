@@ -99,15 +99,33 @@ class MineViewModel extends ChangeNotifier {
 
   /// 更新用户状态 (对应Android的updateUser和updateTestAccount方法)
   void updateUserState() {
-    // 这里应该从某种状态管理或SharedPreferences中获取用户状态
-    // 暂时使用模拟数据
     _isLogin = UserProvider.isLogin();
+    if (!_isLogin) {
+      _userInfo = null;
+      _userCreditDetail = null;
+      _isTestAccount = false;
+      _isMonthPayOpen = false;
+      _hasUserInfo = false;
+      notifyListeners();
+      return;
+    }
     _isTestAccount = _userInfo?.hasTestAccount ?? false;
     _isMonthPayOpen =
         (_userCreditDetail?.hasApply == true && _userCreditDetail?.status == 2);
     _hasUserInfo = _userInfo != null;
 
     notifyListeners();
+  }
+
+  /// 从外部页面返回后同步用户态（如设置页退出登录后）
+  Future<void> syncUserStateAfterRouteBack() async {
+    if (!UserProvider.isLogin()) {
+      updateUserState();
+      return;
+    }
+    await fetchUserInfo();
+    await fetchUserCreditDetail();
+    updateUserState();
   }
 
   /// 加载更多商品

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_boost/flutter_boost.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test_demo/CustomFlutterBinding.dart';
 import 'package:flutter_test_demo/app/constants/app_constants.dart';
 import 'package:flutter_test_demo/app/provider/user_provider.dart';
@@ -49,17 +48,8 @@ class _NavigationAppState extends State<ShopApp> {
     super.initState();
   }
 
-  Future<bool> _onWillPop() async {
-    final appState = BoostNavigator.instance.appState;
-    if (appState != null) {
-      await appState.pop(onBackPressed: true);
-    }
-    return false;
-  }
-
   /// 应用构建器
   Widget appBuilder(Widget home) {
-    final TransitionBuilder easyLoadingBuilder = EasyLoading.init();
     return ScreenUtilInit(
       designSize: const Size(375, 817),
       minTextAdapt: true,
@@ -68,12 +58,7 @@ class _NavigationAppState extends State<ShopApp> {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           home: home,
-          builder: (BuildContext context, Widget? child) {
-            return WillPopScope(
-              onWillPop: _onWillPop,
-              child: easyLoadingBuilder(context, child),
-            );
-          },
+          builder: EasyLoading.init(),
         );
       },
     );
